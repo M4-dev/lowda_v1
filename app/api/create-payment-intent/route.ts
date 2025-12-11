@@ -91,7 +91,7 @@ export async function POST(request: Request) {
     console.log('Filtered products for order:', JSON.stringify(filteredProducts, null, 2));
 
     // Calculate total DMC separately
-    const totalDmc = items.reduce((acc: number, item) => {
+    const totalDmc = items.reduce((acc: number, item: CartProductType) => {
       return acc + ((item.dmc || 0) * item.quantity);
     }, 0);
 
