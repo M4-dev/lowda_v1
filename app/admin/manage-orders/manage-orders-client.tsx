@@ -95,6 +95,7 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
         date: moment(order.createDate).fromNow(),
         deliveryStatus: order.deliveryStatus,
         cancelled: order.cancelled,
+        userConfirmedDelivery: (order as any).userConfirmedDelivery || false,
       };
     });
   }
@@ -352,6 +353,34 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
       },
     },
     {
+      field: "userConfirmedDelivery",
+      headerName: "User Confirmed",
+      width: 140,
+      renderCell: (params) => {
+        return (
+          <div>
+            {params.row.deliveryStatus === "dispatched" && (
+              params.row.userConfirmedDelivery ? (
+                <Status
+                  text="confirmed"
+                  icon={Check}
+                  bg="bg-green-200"
+                  color="text-green-700"
+                />
+              ) : (
+                <Status
+                  text="awaiting"
+                  icon={Clock}
+                  bg="bg-amber-200"
+                  color="text-amber-700"
+                />
+              )
+            )}
+          </div>
+        );
+      },
+    },
+    {
       field: "paymentConfirmed",
       headerName: "Payment Confirmed",
       width: 140,
@@ -405,14 +434,17 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
                   isLoading={loadingActions[`dispatch-${params.row.id}`]}
                   label="Dispatch"
                 />
-                <ActionButton
-                  icon={Check}
-                  onClick={() => {
-                    handleDeliver(params.row.id);
-                  }}
-                  isLoading={loadingActions[`deliver-${params.row.id}`]}
-                  label="Deliver"
-                />
+                {/* Only show Deliver button if user has confirmed delivery */}
+                {params.row.userConfirmedDelivery && (
+                  <ActionButton
+                    icon={Check}
+                    onClick={() => {
+                      handleDeliver(params.row.id);
+                    }}
+                    isLoading={loadingActions[`deliver-${params.row.id}`]}
+                    label="Deliver"
+                  />
+                )}
                 <ActionButton
                   icon={XCircle}
                   onClick={() => {

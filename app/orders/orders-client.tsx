@@ -39,6 +39,24 @@ const OrdersClient: React.FC<OrdersClient> = ({ orders }) => {
   const [nameToDelete, setNameToDelete] = useState("");
   const [orderToDelete, setOrderToDelete] = useState("");
   const [hiddenOrders, setHiddenOrders] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(false);
+
+  const handleDeliveryConfirmation = async (orderId: string, confirmed: boolean) => {
+    setLoading(true);
+    try {
+      await axios.put("/api/order/confirm-delivery", {
+        orderId,
+        confirmed,
+      });
+      toast.success(confirmed ? "Delivery confirmed!" : "Confirmation removed");
+      router.refresh();
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Failed to update confirmation");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDeleteOrder = useCallback((row: string) => {
     axios
@@ -251,6 +269,23 @@ const OrdersClient: React.FC<OrdersClient> = ({ orders }) => {
                         </div>
                       )}
                     </div>
+
+                    {/* User Delivery Confirmation Button */}
+                    {order.deliveryStatus === "dispatched" && !isCancelled && (
+                      <div className="w-full md:w-auto">
+                        <button
+                          onClick={() => handleDeliveryConfirmation(order.id, !(order as any).userConfirmedDelivery)}
+                          disabled={loading}
+                          className={`w-full md:w-auto px-4 py-2 rounded-lg text-sm font-semibold transition active:scale-95 ${
+                            (order as any).userConfirmedDelivery
+                              ? "bg-green-100 text-green-700 border border-green-300 hover:bg-green-200"
+                              : "bg-amber-100 text-amber-700 border border-amber-300 hover:bg-amber-200"
+                          } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          {loading ? "..." : (order as any).userConfirmedDelivery ? "✓ I Have Received" : "I Have Not Received"}
+                        </button>
+                      </div>
+                    )}
 
                     <div className="flex items-center gap-2">
                       <ActionButton
