@@ -16,6 +16,11 @@ export default async function getSettings() {
         spf: 100,
         nextDeliveryTime: null,
         whatsappNumber: null,
+        bannerTitle: "Summer Sale!",
+        bannerSubtitle: "Enjoy discounts on selected items",
+        bannerDiscount: "GET 20% OFF",
+        bannerImage: null,
+        bannerColors: ["blue", "indigo"],
         updatedAt: new Date(),
       };
     }
@@ -29,6 +34,11 @@ export default async function getSettings() {
       spf: settings.spf || 100,
       nextDeliveryTime: settings.nextDeliveryTime || null,
       whatsappNumber: settings.whatsappNumber || null,
+      bannerTitle: settings.bannerTitle || "Summer Sale!",
+      bannerSubtitle: settings.bannerSubtitle || "Enjoy discounts on selected items",
+      bannerDiscount: settings.bannerDiscount || "GET 20% OFF",
+      bannerImage: settings.bannerImage || null,
+      bannerColors: settings.bannerColors || ["blue", "indigo"],
       updatedAt: settings.updatedAt,
     };
   } catch (error) {
@@ -42,6 +52,11 @@ export default async function getSettings() {
       spf: 100,
       nextDeliveryTime: null,
       whatsappNumber: null,
+      bannerTitle: "Summer Sale!",
+      bannerSubtitle: "Enjoy discounts on selected items",
+      bannerDiscount: "GET 20% OFF",
+      bannerImage: null,
+      bannerColors: ["blue", "indigo"],
       updatedAt: new Date(),
     };
   }
