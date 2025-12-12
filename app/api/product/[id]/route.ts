@@ -1,7 +1,6 @@
 import getCurrentUser from "@/actions/get-current-user";
 import prisma from "@/libs/prismadb";
 import { NextResponse } from "next/server";
-import { MongoClient, ObjectId } from "mongodb";
 
 export async function DELETE(
   request: Request,
@@ -13,17 +12,17 @@ export async function DELETE(
     return NextResponse.error();
   }
 
-  const mongoClient = new MongoClient(process.env.DATABASE_URL!);
-  await mongoClient.connect();
-  
   try {
-    const db = mongoClient.db("ecommerce-nextjs-app");
-    const product = await db.collection("Product").findOneAndDelete({
-      _id: new ObjectId(params.id)
+    const product = await prisma.product.delete({
+      where: { id: params.id },
     });
     return NextResponse.json(product);
-  } finally {
-    await mongoClient.close();
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    return NextResponse.json(
+      { error: "Product not found" },
+      { status: 404 }
+    );
   }
 }
 
@@ -80,20 +79,18 @@ export async function PUT(
   if (stockNum !== undefined) updateData.stock = stockNum;
   if (remainingNum !== undefined) updateData.remainingStock = remainingNum;
   if (isVisible !== undefined) updateData.isVisible = isVisible;
-  updateData.updatedAt = new Date();
 
-  const mongoClient = new MongoClient(process.env.DATABASE_URL!);
-  await mongoClient.connect();
-  
   try {
-    const db = mongoClient.db("ecommerce-nextjs-app");
-    const result = await db.collection("Product").findOneAndUpdate(
-      { _id: new ObjectId(params.id) },
-      { $set: updateData },
-      { returnDocument: "after" }
+    const product = await prisma.product.update({
+      where: { id: params.id },
+      data: updateData,
+    });
+    return NextResponse.json(product);
+  } catch (error) {
+    console.error("Error updating product:", error);
+    return NextResponse.json(
+      { error: "Product not found" },
+      { status: 404 }
     );
-    return NextResponse.json(result);
-  } finally {
-    await mongoClient.close();
   }
 }

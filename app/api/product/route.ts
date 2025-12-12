@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import getCurrentUser from "@/actions/get-current-user";
-import { MongoClient, ObjectId } from "mongodb";
+import prisma from "@/libs/prismadb";
 
 export async function POST(request: Request) {
   const currentUser = await getCurrentUser();
@@ -29,40 +29,31 @@ export async function POST(request: Request) {
   const inStockFlag = remaining > 0;
   const dmcValue = dmc ? parseFloat(dmc) : 0;
 
-  const mongoClient = new MongoClient(process.env.DATABASE_URL!);
-  await mongoClient.connect();
-
   try {
-    const db = mongoClient.db("ecommerce-nextjs-app");
-    const now = new Date();
-    
-    const productDoc = {
-      _id: new ObjectId(),
-      name,
-      description,
-      brand,
-      category,
-      inStock: inStockFlag,
-      stock: stockNum,
-      remainingStock: remaining,
-      isVisible: isVisible !== undefined ? isVisible : true,
-      images,
-      price: parseFloat(price),
-      dmc: dmcValue,
-      list: parseFloat(list),
-      reviews: [],
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    await db.collection("Product").insertOne(productDoc);
-
-    return NextResponse.json({
-      ...productDoc,
-      id: productDoc._id.toString(),
+    const product = await prisma.product.create({
+      data: {
+        name,
+        description,
+        brand,
+        category,
+        inStock: inStockFlag,
+        stock: stockNum,
+        remainingStock: remaining,
+        isVisible: isVisible !== undefined ? isVisible : true,
+        images,
+        price: parseFloat(price),
+        dmc: dmcValue,
+        list: parseFloat(list),
+      },
     });
-  } finally {
-    await mongoClient.close();
+
+    return NextResponse.json(product);
+  } catch (error) {
+    console.error("Error creating product:", error);
+    return NextResponse.json(
+      { error: "Failed to create product" },
+      { status: 500 }
+    );
   }
 }
 
@@ -82,34 +73,18 @@ export async function PUT(request: Request) {
   if (inStock !== undefined) updateData.inStock = inStock;
   if (isVisible !== undefined) updateData.isVisible = isVisible;
 
-  // Use native MongoDB driver
-  const { MongoClient, ObjectId } = await import("mongodb");
-  const mongoClient = new MongoClient(process.env.DATABASE_URL!);
-  await mongoClient.connect();
-
   try {
-    const db = mongoClient.db("ecommerce-nextjs-app");
-    
-    const result = await db.collection("Product").findOneAndUpdate(
-      { _id: new ObjectId(id) },
-      {
-        $set: {
-          ...updateData,
-          updatedAt: new Date(),
-        },
-      },
-      { returnDocument: "after" }
+    const product = await prisma.product.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return NextResponse.json(product);
+  } catch (error) {
+    console.error("Error updating product:", error);
+    return NextResponse.json(
+      { error: "Product not found" },
+      { status: 404 }
     );
-
-    if (!result) {
-      return NextResponse.json(
-        { error: "Product not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(result);
-  } finally {
-    await mongoClient.close();
   }
 }
