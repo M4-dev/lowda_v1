@@ -199,7 +199,7 @@ export default async function Home({ searchParams }: HomeProps) {
           title={settings?.bannerTitle}
           subtitle={settings?.bannerSubtitle}
           discount={settings?.bannerDiscount}
-          image={settings?.bannerImage}
+          image={settings?.bannerImage || undefined}
           colors={settings?.bannerColors}
         />
 
