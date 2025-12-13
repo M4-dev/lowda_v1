@@ -13,8 +13,8 @@ import { Toaster } from "react-hot-toast";
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "600"] });
 
 export const metadata: Metadata = {
-  title: "WindowChop",
-  description: "WindowChop - The Easiest Shop On Campus",
+  title: "easyByFar",
+  description: "easyByFar - The Easiest Shop On Campus",
 };
 
 export default function RootLayout({
