@@ -19,7 +19,7 @@ export async function PUT(
     await mongoClient.connect();
 
     try {
-      const db = mongoClient.db("ecommerce-nextjs-app");
+      const db = mongoClient.db("windowshopdb");
       
       // Fetch order
       const order = await db.collection("Order").findOne({

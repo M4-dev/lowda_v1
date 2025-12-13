@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
     const mongoClient = new MongoClient(MONGO_URI);
     await mongoClient.connect();
-    const db = mongoClient.db("ecommerce-nextjs-app");
+    const db = mongoClient.db("windowshopdb");
 
     const notification = await db.collection("Notification").insertOne({
       title,

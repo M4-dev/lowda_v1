@@ -14,6 +14,8 @@ const rainbowColors: Record<string, { from: string; to: string }> = {
   blue: { from: "from-blue-600", to: "to-blue-400" },
   indigo: { from: "from-indigo-600", to: "to-indigo-400" },
   purple: { from: "from-purple-600", to: "to-purple-400" },
+  black: { from: "from-gray-900", to: "to-gray-700" },
+  white: { from: "from-gray-100", to: "to-gray-300" },
 };
 
 interface HomeBannerProps {

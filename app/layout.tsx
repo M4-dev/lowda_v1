@@ -50,7 +50,7 @@ export default async function RootLayout({
           {currentUser && currentUser.role !== "ADMIN" && (
             <CustomerNotifications userId={currentUser.id} />
           )}
-          <NavBar currentUser={currentUser} nextDeliveryTime={settings?.nextDeliveryTime} />
+          <NavBar currentUser={currentUser} nextDeliveryTime={settings?.nextDeliveryTime?.toISOString() || null} />
           <main className="flex-grow">{children}</main>
           <Footer whatsappNumber={(settings as any)?.whatsappNumber} />
         </CartProvider>

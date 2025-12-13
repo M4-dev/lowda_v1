@@ -124,13 +124,19 @@ const EditProductForm = ({ product }: { product: Product }) => {
               console.log("File available at", url);
             }
           }
+          return true; // Upload successful
         } catch (error) {
           setIsLoading(false);
           console.log("Error handling image uploads", error);
-          return toast.error("Error handling image uploads");
+          toast.error("Error handling image uploads");
+          return false; // Upload failed
         }
       };
-      await handleImageUploads();
+      
+      const uploadSuccess = await handleImageUploads();
+      if (!uploadSuccess) {
+        return; // Stop if upload failed
+      }
     }
 
     const list = data.list === "" || data.list === 0 ? data.price : data.list;

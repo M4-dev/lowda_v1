@@ -1,9 +1,10 @@
-import { getMongoDb } from "@/libs/mongodb";
+import prisma from "@/libs/prismadb";
 
 export default async function getSettings() {
   try {
-    const db = await getMongoDb();
-    const settings = await db.collection("Settings").findOne({ _id: "settings" } as any);
+    const settings = await prisma.settings.findUnique({
+      where: { id: "settings" },
+    });
 
     if (!settings) {
       return {
@@ -13,32 +14,34 @@ export default async function getSettings() {
         accountHolderName: "",
         hostels: [],
         spf: 100,
+        nextDeliveryTime: null,
+        whatsappNumber: null,
         bannerTitle: "Summer Sale!",
         bannerSubtitle: "Enjoy discounts on selected items",
         bannerDiscount: "GET 20% OFF",
-        bannerImage: "/banner-image.png",
+        bannerImage: null,
         bannerColors: ["blue", "indigo"],
-        nextDeliveryTime: null,
-        whatsappNumber: null,
         updatedAt: new Date(),
+        bannerVisible: true,
       };
     }
 
     return {
-      id: settings._id,
+      id: settings.id,
       bankName: settings.bankName || "",
       bankAccountNumber: settings.bankAccountNumber || "",
       accountHolderName: settings.accountHolderName || "",
       hostels: settings.hostels || [],
       spf: settings.spf || 100,
+      nextDeliveryTime: settings.nextDeliveryTime || null,
+      whatsappNumber: settings.whatsappNumber || null,
       bannerTitle: settings.bannerTitle || "Summer Sale!",
       bannerSubtitle: settings.bannerSubtitle || "Enjoy discounts on selected items",
       bannerDiscount: settings.bannerDiscount || "GET 20% OFF",
-      bannerImage: settings.bannerImage || "/banner-image.png",
+      bannerImage: settings.bannerImage || null,
       bannerColors: settings.bannerColors || ["blue", "indigo"],
-      nextDeliveryTime: settings.nextDeliveryTime || null,
-      whatsappNumber: settings.whatsappNumber || null,
       updatedAt: settings.updatedAt,
+      bannerVisible: settings.bannerVisible ?? true,
     };
   } catch (error) {
     console.error("Error fetching settings:", error);
@@ -49,14 +52,15 @@ export default async function getSettings() {
       accountHolderName: "",
       hostels: [],
       spf: 100,
+      nextDeliveryTime: null,
+      whatsappNumber: null,
       bannerTitle: "Summer Sale!",
       bannerSubtitle: "Enjoy discounts on selected items",
       bannerDiscount: "GET 20% OFF",
-      bannerImage: "/banner-image.png",
+      bannerImage: null,
       bannerColors: ["blue", "indigo"],
-      nextDeliveryTime: null,
-      whatsappNumber: null,
       updatedAt: new Date(),
+      bannerVisible: true,
     };
   }
 }

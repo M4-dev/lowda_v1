@@ -98,16 +98,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
           </div>
         </Link>
 
-        <div className="flex items-center gap-[1.5px] pb-1">
-          <Rating
-            value={productRating(data.reviews)}
-            readOnly
-            size="small"
-            precision={0.5}
-          />
-          <ChevronDown size={12} className="opacity-60" />
-          <div className="opacity-60 font-bold">{data.reviews.length}</div>
-        </div>
+
+        {/* Product Description */}
+        {data.description && (
+          <div className="text-xs text-slate-500 mb-1 line-clamp-2 min-h-[2.5em]">
+            {truncateText(data.description, 100)}
+          </div>
+        )}
 
         {data.list !== data.price && (
           <div className="flex flex-wrap justify-center font-normal text-sm text-slate-400 gap-2 mb-1">

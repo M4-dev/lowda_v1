@@ -73,50 +73,46 @@ export default function AdminClient({
           <ProductPerformanceChart data={initialProductData} />
         </div>
         
-        {currentUser.role === "ADMIN" && (
-          <>
-            {/* Revenue Graph */}
-            <div className="mt-8 p-6 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-2xl shadow-lg mx-auto max-w-[1150px]">
-              <h2 className="text-2xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-                <span className="text-3xl">📊</span>
-                Revenue & Orders Overview
-              </h2>
-              {isLoading ? (
-                <div className="text-center py-10 text-gray-500">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-                  <p className="mt-3">Loading data...</p>
-                </div>
-              ) : (
-                <RevenueGraph 
-                  data={revenueData} 
-                  onRangeChange={handleRangeChange}
-                  currentRange={timeRange}
-                />
-              )}
+        {/* Revenue Graph */}
+        <div className="mt-8 p-6 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-2xl shadow-lg mx-auto max-w-[1150px]">
+          <h2 className="text-2xl font-bold text-blue-800 mb-4 flex items-center gap-2">
+            <span className="text-3xl">📊</span>
+            Revenue & Orders Overview
+          </h2>
+          {isLoading ? (
+            <div className="text-center py-10 text-gray-500">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+              <p className="mt-3">Loading data...</p>
             </div>
+          ) : (
+            <RevenueGraph 
+              data={revenueData} 
+              onRangeChange={handleRangeChange}
+              currentRange={timeRange}
+            />
+          )}
+        </div>
 
-            {/* User Growth and Order Status Charts */}
-            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-[1150px] mx-auto">
-              {/* User Growth */}
-              <div className="p-6 bg-gradient-to-br from-green-50 to-white border border-green-200 rounded-2xl shadow-lg">
-                <h2 className="text-xl font-bold text-green-800 mb-4 flex items-center gap-2">
-                  <span className="text-2xl">👥</span>
-                  User Growth Trends
-                </h2>
-                <UserGrowthChart data={initialUserGrowthData} />
-              </div>
+        {/* User Growth and Order Status Charts */}
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-[1150px] mx-auto">
+          {/* User Growth */}
+          <div className="p-6 bg-gradient-to-br from-green-50 to-white border border-green-200 rounded-2xl shadow-lg">
+            <h2 className="text-xl font-bold text-green-800 mb-4 flex items-center gap-2">
+              <span className="text-2xl">👥</span>
+              User Growth Trends
+            </h2>
+            <UserGrowthChart data={initialUserGrowthData} />
+          </div>
 
-              {/* Order Status Timeline */}
-              <div className="p-6 bg-gradient-to-br from-amber-50 to-white border border-amber-200 rounded-2xl shadow-lg">
-                <h2 className="text-xl font-bold text-amber-800 mb-4 flex items-center gap-2">
-                  <span className="text-2xl">📦</span>
-                  Order Status Timeline
-                </h2>
-                <OrderStatusChart data={initialOrderStatusData} />
-              </div>
-            </div>
-          </>
-        )}
+          {/* Order Status Timeline */}
+          <div className="p-6 bg-gradient-to-br from-amber-50 to-white border border-amber-200 rounded-2xl shadow-lg">
+            <h2 className="text-xl font-bold text-amber-800 mb-4 flex items-center gap-2">
+              <span className="text-2xl">📦</span>
+              Order Status Timeline
+            </h2>
+            <OrderStatusChart data={initialOrderStatusData} />
+          </div>
+        </div>
       </Container>
     </div>
   );

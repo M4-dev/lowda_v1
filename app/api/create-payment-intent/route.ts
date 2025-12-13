@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     }
 
     await mongoClient.connect();
-    const db = mongoClient.db("ecommerce-nextjs-app");
+    const db = mongoClient.db("windowshopdb");
 
     // Fetch SPF from settings
     const settings = await db.collection("Settings").findOne({ _id: "settings" } as any);

@@ -131,6 +131,12 @@ model Settings {
   spf               Float     @default(100)
   nextDeliveryTime  DateTime?
   whatsappNumber    String?
+  bannerTitle       String?
+  bannerSubtitle    String?
+  bannerDiscount    String?
+  bannerImage       String?
+  bannerColors      String[]  @default([])
+  bannerVisible     Boolean   @default(true)
   updatedAt         DateTime  @updatedAt
 }
 

@@ -61,10 +61,16 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ settings, currentUser }
 
               // Log response for debugging in case orderId is missing
               console.debug("create-payment-intent response json:", json);
-
+              if (!json || typeof json !== 'object') {
+                console.error('API did not return a valid JSON object:', json);
+              }
+              if (!json.orderId) {
+                console.error('API response missing orderId:', json);
+              }
               return json;
             })
           .then((data) => {
+            console.debug('Order creation .then() data:', data);
             if (data?.orderId) {
               setOrderId(data.orderId);
               if (data?.guestToken) {
@@ -73,6 +79,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ settings, currentUser }
               console.log("Order ID:", data.orderId);
               handleSetPaymentIntent(data.orderId);
             } else {
+              console.error('No orderId in response:', data);
               throw new Error("No orderId in response");
             }
           })

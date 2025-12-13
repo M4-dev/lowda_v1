@@ -34,6 +34,7 @@ const ManageBannerClient: React.FC<ManageBannerClientProps> = ({ settings }) => 
   const [selectedColors, setSelectedColors] = useState<string[]>(
     settings?.bannerColors || ["blue", "indigo"]
   );
+  const [bannerVisible, setBannerVisible] = useState<boolean>(settings?.bannerVisible ?? true);
 
   const {
     register,
@@ -105,6 +106,7 @@ const ManageBannerClient: React.FC<ManageBannerClientProps> = ({ settings }) => 
         ...data,
         bannerImage: bannerImage,
         bannerColors: selectedColors,
+        bannerVisible: bannerVisible,
       });
       toast.success("Banner updated successfully!");
       router.refresh();
@@ -254,6 +256,17 @@ const ManageBannerClient: React.FC<ManageBannerClientProps> = ({ settings }) => 
                   Remove Image
                 </button>
               )}
+            </div>
+
+            <div className="flex items-center gap-2 mb-4">
+              <label htmlFor="bannerVisible" className="font-medium text-slate-700">Show Banner on Homepage</label>
+              <input
+                id="bannerVisible"
+                type="checkbox"
+                checked={bannerVisible}
+                onChange={e => setBannerVisible(e.target.checked)}
+                className="w-5 h-5 accent-blue-600"
+              />
             </div>
           </div>
         </div>

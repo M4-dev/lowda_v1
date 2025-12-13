@@ -22,7 +22,7 @@ export async function PUT(
     const orderId = params.id;
 
     await mongoClient.connect();
-    const db = mongoClient.db("ecommerce-nextjs-app");
+    const db = mongoClient.db("windowshopdb");
 
     // Get order to get userId
     const order = await db.collection("Order").findOne({

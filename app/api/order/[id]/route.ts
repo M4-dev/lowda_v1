@@ -28,7 +28,7 @@ export async function PUT(
     await mongoClient.connect();
 
     try {
-      const db = mongoClient.db("ecommerce-nextjs-app");
+      const db = mongoClient.db("windowshopdb");
       
       // Verify order belongs to current user
       const order = await db.collection("Order").findOne({

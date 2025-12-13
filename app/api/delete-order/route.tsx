@@ -18,7 +18,7 @@ export async function PUT(request: Request) {
 
   const mongoClient = new MongoClient(MONGO_URI);
   await mongoClient.connect();
-  const db = mongoClient.db("ecommerce-nextjs-app");
+  const db = mongoClient.db("windowshopdb");
 
   const result = await db.collection("Order").deleteOne({
     _id: new ObjectId(row.id),
