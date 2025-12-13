@@ -38,7 +38,7 @@ export async function getMongoDb() {
     await (global.mongoClient as any).connect();
   }
   
-  return (global.mongoClient as any).db("ecommerce-nextjs-app");
+  return (global.mongoClient as any).db("windowshopdb");
 }
 
 declare global {
