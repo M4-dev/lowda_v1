@@ -28,7 +28,6 @@ export default async function getProductById(params: ItemsParams) {
       return null;
     }
 
-    console.log("Product fetched from DB:", { id: product.id, name: product.name, price: product.price, dmc: product.dmc });
 
     return product;
   } catch (error: any) {

@@ -33,9 +33,21 @@ export async function POST(request: Request) {
     await mongoClient.connect();
     const db = mongoClient.db("windowshopdb");
 
-    // Fetch SPF from settings
-    const settings = await db.collection("Settings").findOne({ _id: "settings" } as any);
-    const spf = (settings as any)?.spf || 100;
+    // Calculate per-order SPF as sum of (product SPF × quantity) for all products ONLY (do not add DMC)
+    let perOrderSpf = 0;
+    let totalDmc = 0;
+    for (const item of items) {
+      let productObjectId;
+      try {
+        productObjectId = new ObjectId(item.id);
+      } catch (err) {
+        continue;
+      }
+      const product = await db.collection("Product").findOne({ _id: productObjectId });
+      const productSpf = (product && product.spf !== undefined) ? product.spf : 75; // fallback default
+      perOrderSpf += productSpf * (item.quantity || 1);
+      totalDmc += (item.dmc || 0) * (item.quantity || 1);
+    }
 
     // Pre-check stock availability for all items
     for (const item of items) {
@@ -69,7 +81,7 @@ export async function POST(request: Request) {
     }
 
     const total = Math.round(calculateOrderAmount(items));
-    const totalWithSpf = total + spf;
+    const totalWithSpf = total + perOrderSpf;
     const mockPaymentIntentId = `mock_payment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Filter items to only include fields defined in CartProductType schema
@@ -90,10 +102,7 @@ export async function POST(request: Request) {
     
     console.log('Filtered products for order:', JSON.stringify(filteredProducts, null, 2));
 
-    // Calculate total DMC separately
-    const totalDmc = items.reduce((acc: number, item: CartProductType) => {
-      return acc + ((item.dmc || 0) * item.quantity);
-    }, 0);
+    // totalDmc already calculated above
 
     // Generate guest token for anonymous users
     const guestToken = !currentUser ? crypto.randomBytes(32).toString('hex') : null;
@@ -108,7 +117,7 @@ export async function POST(request: Request) {
       guestToken: guestToken,
       amount: totalWithSpf,
       totalDmc: totalDmc,
-      spf: spf,
+      spf: perOrderSpf,
       currency: "NGN",
       status: "pending",
       deliveryStatus: "pending",

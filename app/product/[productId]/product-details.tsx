@@ -43,7 +43,6 @@ const Horizontal = () => {
 };
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({ product, spf }) => {
-  //console.log("Product in client component:", { id: product.id, name: product.name, price: product.price, dmc: product.dmc });
   
   const { cartProducts, handleAddProductToCart } = useCart();
   const [isProductInCart, setIsProductInCart] = useState<boolean>(false);

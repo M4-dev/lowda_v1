@@ -56,7 +56,7 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
   }, [settings]);
 
   useEffect(() => {
-    // Calculate total sale from non-reimbursed orders only
+    // Calculate total sale, DMC, and SPF from non-reimbursed orders only
     const totalSale = orders.reduce((acc, order) => {
       if (order.paymentConfirmed && !(order as any).reimbursed) {
         return acc + order.amount;
@@ -64,7 +64,6 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
       return acc;
     }, 0);
 
-    // Calculate total DMC from non-reimbursed orders only
     const totalDmc = orders.reduce((acc, order) => {
       if (order.paymentConfirmed && !(order as any).reimbursed) {
         const orderDmc = (order as any).totalDmc ?? 
@@ -76,7 +75,17 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
       return acc;
     }, 0);
 
-    setToReimburse(totalSale - totalDmc);
+    const totalSpf = orders.reduce((acc, order) => {
+      if (order.paymentConfirmed && !(order as any).reimbursed) {
+        const orderSpf = (order as any).spf ?? 
+          ((order.products as any[])?.reduce((spfAcc, product) => {
+            return spfAcc + ((product.spf || 0) * (product.quantity || 0));
+          }, 0) || 0);
+        return acc + orderSpf;
+      }
+      return acc;
+    }, 0);
+    setToReimburse(totalSale - totalDmc - totalSpf);
   }, [orders]);
 
   useEffect(() => {

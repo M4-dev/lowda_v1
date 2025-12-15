@@ -80,6 +80,7 @@ model Order {
   guestToken        String?   @unique
   amount            Float
   totalDmc          Float     @default(0)
+  spf               Float     @default(0)
   currency          String
   status            String
   deliveryStatus    String

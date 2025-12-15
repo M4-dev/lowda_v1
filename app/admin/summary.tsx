@@ -22,6 +22,8 @@ type SummaryDataType = {
 };
 
 const Summary: React.FC<SummaryProps> = ({ products, orders, users, userRole }) => {
+    // Debug: print all orders received by Summary
+    console.log('Orders array received by Summary:', orders);
   const isManager = userRole === "MANAGER";
   const [summaryData, setSummaryData] = useState<SummaryDataType>({
     sale: {
@@ -132,21 +134,13 @@ const Summary: React.FC<SummaryProps> = ({ products, orders, users, userRole }) 
       
       console.log('Final Total DMC:', totalDmc);
 
-      // Calculate "To Reimburse" from non-reimbursed orders only
-      const saleToReimburse = orders.reduce((acc, item) => {
-        if (item.paymentConfirmed && !(item as any).reimbursed) {
-          return acc + item.amount;
-        }
-        return acc;
-      }, 0);
 
-      const dmcToReimburse = orders.reduce((acc, order) => {
-        if (order.paymentConfirmed && !(order as any).reimbursed) {
-          const orderDmc = (order as any).totalDmc ?? 
-            ((order.products as any[])?.reduce((dmcAcc, product) => {
-              return dmcAcc + ((product.dmc || 0) * (product.quantity || 0));
-            }, 0) || 0);
-          return acc + orderDmc;
+      // To Reimburse: sum of all paid, non-reimbursed order totals minus their DMC and SPF
+      const toReimburse = orders.reduce((acc, item) => {
+        if (item.paymentConfirmed && !(item as any).reimbursed) {
+          const dmc = (item as any).totalDmc ?? ((item.products as any[])?.reduce((dmcAcc, product) => dmcAcc + ((product.dmc || 0) * (product.quantity || 0)), 0) || 0);
+          const spf = (item as any).spf ?? 0;
+          return acc + (item.amount - dmc - spf);
         }
         return acc;
       }, 0);
@@ -177,15 +171,12 @@ const Summary: React.FC<SummaryProps> = ({ products, orders, users, userRole }) 
         return acc;
       }, 0);
 
-      // Calculate total SPF collected from all paid orders
+      // Calculate total SPF collected from all paid orders (do NOT add DMC)
       const totalSpf = orders.reduce((acc, order) => {
         if (order.paymentConfirmed) {
-          // Use the spf field from order if available
-          // For old orders without spf field, we need to calculate it from amount - products cost
           if ((order as any).spf !== undefined) {
             return acc + (order as any).spf;
           } else {
-            // For old orders, calculate SPF as: amount - (sum of products)
             const productTotal = (order.products as any[])?.reduce((sum, product) => {
               return sum + ((product.price + (product.dmc || 0)) * product.quantity);
             }, 0) || 0;
@@ -205,8 +196,15 @@ const Summary: React.FC<SummaryProps> = ({ products, orders, users, userRole }) 
       tempData.users.digit = users.length;
       tempData.refunds.digit = totalRefunds;
       tempData.refundDmc.digit = refundDmc;
-      tempData.reimburse.digit = saleToReimburse - dmcToReimburse;
+      // To Reimburse: total sale minus (total DMC + total SPF)
+      tempData.reimburse.digit = totalSale - (totalDmc + totalSpf);
       tempData.totalSpf.digit = totalSpf;
+
+      // DMC + SPF (for subtext): sum of all DMC + sum of all SPF
+      tempData.dmcSpfCombined = {
+        label: 'DMC + SPF',
+        digit: tempData.totalSpf.digit + totalDmc,
+      };
 
       return tempData;
     });
@@ -264,7 +262,7 @@ const Summary: React.FC<SummaryProps> = ({ products, orders, users, userRole }) 
               {key === 'sale' && (summaryData.dmc.digit > 0 || summaryData.totalSpf.digit > 0) && (
                 <div className="mt-2 pt-2 border-t border-emerald-200">
                   <div className="text-xs text-emerald-500">
-                    DMC + SPF: {formatPrice(summaryData.dmc.digit + summaryData.totalSpf.digit)}
+                    DMC + SPF: {formatPrice(summaryData.dmcSpfCombined?.digit || 0)}
                   </div>
                 </div>
               )}
