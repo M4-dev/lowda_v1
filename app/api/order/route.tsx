@@ -45,6 +45,7 @@ export async function PUT(request: Request) {
     const notification = {
       userId: order.userId.toString(),
       type: "order_dispatched",
+      title: "Order Dispatched 🚚",
       message: "Your order is on the way! 🚚",
       orderId: id,
       createdAt: new Date(),

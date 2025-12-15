@@ -121,7 +121,23 @@ export async function POST(request: Request) {
       updatedAt: now,
     };
     
+
     await db.collection("Order").insertOne(orderDoc);
+
+    // Send push notification to admins
+    try {
+      await fetch(`${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/admin-notification`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: "New Order Placed!",
+          body: `A new order has been placed${currentUser ? ` by ${currentUser.name || currentUser.email}` : " by a guest"}.`,
+          url: `/admin/manage-orders`,
+        }),
+      });
+    } catch (notifyErr) {
+      console.error("Failed to send admin push notification", notifyErr);
+    }
 
     // Decrement product remainingStock for each purchased item
     for (const item of items) {
