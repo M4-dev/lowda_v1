@@ -94,9 +94,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
       <div className="flex flex-col items-center w-full gap-1 flex-1 p-3 text-center">
                 {/* WhatsApp Share Link */}
                 <a
-                  href={`https://wa.me/?text=${encodeURIComponent(
-                    `${typeof window !== 'undefined' ? window.location.origin : ''}/product/${data.id}`
-                  )}`}
+                  href={`https://wa.me/?text=${encodeURIComponent(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/product/${data.id}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-2 inline-block text-green-600 hover:text-green-800 text-xs font-medium"

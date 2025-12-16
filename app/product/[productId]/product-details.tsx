@@ -105,9 +105,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, spf }) => {
   }, [cartProduct]);
 
   // Get product link for sharing
-  const productLink = typeof window !== 'undefined'
-    ? `${window.location.origin}/product/${product.id}`
-    : '';
+  const productLink = `${process.env.NEXT_PUBLIC_BASE_URL || ''}/product/${product.id}`;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 sm:mt-6">
