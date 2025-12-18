@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Container from "../container";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Monoton } from "next/font/google";
 import CartCount from "./cart-count";
 import UserMenu from "./user-menu";
@@ -12,6 +12,7 @@ import { Search } from "lucide-react";
 import { SafeUser } from "@/types";
 import { ChevronLeft, X } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
+import Spinner from "../spinner";
 import DeliveryCountdown from "../delivery-countdown";
 import NotificationButton from "../notification-button";
 
@@ -24,11 +25,32 @@ interface NavBarPros {
 
 const ClientNavBar: React.FC<NavBarPros> = ({ currentUser = null, nextDeliveryTime = null }) => {
   const [searchBar, setSearchBar] = useState<boolean>(false);
-  const router = useRouter();
+  const [logoLoading, setLogoLoading] = useState(false);
+  const logoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const path = usePathname();
+  const prevPathRef = useRef<string | null>(null);
+
+  // Hide spinner when path changes (navigation complete)
+  useEffect(() => {
+    if (logoLoading && prevPathRef.current !== path) {
+      setLogoLoading(false);
+      if (logoTimeoutRef.current) clearTimeout(logoTimeoutRef.current);
+    }
+    prevPathRef.current = path;
+  }, [path, logoLoading]);
+  const router = useRouter();
 
   const resetSearch = () => {
     router.push("/");
+  };
+
+  // Show spinner if home logo is clicked and navigation is slow
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (path === "/") return;
+    if (logoTimeoutRef.current) clearTimeout(logoTimeoutRef.current);
+    logoTimeoutRef.current = setTimeout(() => setLogoLoading(true), 300); // Show spinner if not loaded in 300ms
+    // Fallback: hide spinner after 5s
+    setTimeout(() => setLogoLoading(false), 5000);
   };
 
   return (
@@ -39,6 +61,7 @@ const ClientNavBar: React.FC<NavBarPros> = ({ currentUser = null, nextDeliveryTi
             <Link
               href="/"
               className="relative flex items-center text-white font-semibold text-[1.1rem] sm:text-[1.8rem] hover:scale-105 active:scale-100 transition"
+              onClick={handleLogoClick}
             >
               {path && path.includes("/product") && (
                 <ChevronLeft className="text-[1rem] sm:text-[1.25rem] mb-1 sm:mb-[1.75px]" />
@@ -46,6 +69,11 @@ const ClientNavBar: React.FC<NavBarPros> = ({ currentUser = null, nextDeliveryTi
               <span className="text-emerald-400">easyBy</span>
               <span className="text-slate-200 ml-1">Far</span>
               <span className="text-emerald-400">.</span>
+              {logoLoading && (
+                <span className="ml-2">
+                  <Spinner size={22} />
+                </span>
+              )}
               <span className="absolute -top-1 -right-8 sm:-right-12 bg-emerald-500 text-white text-[0.6rem] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 rounded-full">
                 Shop
               </span>
