@@ -145,14 +145,12 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
 
   const onSubmitDeliveryTime: SubmitHandler<FieldValues> = async (data) => {
     if (!data.deliveryTime) {
-      toast.error("Please select a delivery time");
+      toast.error("Please select a delivery date and time");
       return;
     }
 
-    // Convert time string to today's date with selected time
-    const [hours, minutes] = data.deliveryTime.split(':');
-    const selectedTime = new Date();
-    selectedTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    // Parse the datetime-local string (YYYY-MM-DDTHH:mm)
+    const selectedTime = new Date(data.deliveryTime);
 
     // Validate time range (10 minutes to 7 days from now)
     const now = new Date();
@@ -265,17 +263,17 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
         <form onSubmit={deliveryForm.handleSubmit(onSubmitDeliveryTime)} className="flex flex-col gap-4">
           <div className="flex-1 w-full">
             <label className="font-medium text-sm text-slate-700 mb-2 block">
-              Set Delivery Time (10 min - 7 days from now)
+              Set Delivery Date & Time (10 min - 7 days from now)
             </label>
             <input
               id="deliveryTime"
-              type="time"
+              type="datetime-local"
               {...deliveryForm.register("deliveryTime", { required: true })}
               disabled={isUpdatingDeliveryTime}
               className="w-full p-3 border-2 border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-lg"
             />
             <p className="text-slate-500 text-xs mt-2">
-              Select a time for today or up to 7 days ahead
+              Select a date and time up to 7 days ahead
             </p>
           </div>
           <div className="w-full sm:w-auto">
