@@ -34,9 +34,10 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
   });
 
   // Helper to format ISO date to 'YYYY-MM-DDTHH:mm' for datetime-local
-  function formatDateTimeLocal(dateString?: string | null) {
-    if (!dateString) return "";
-    const date = new Date(dateString);
+  function formatDateTimeLocal(dateInput?: string | Date | null) {
+    if (!dateInput) return "";
+    // Accept both string and Date
+    const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
     // Pad with zeros
     const pad = (n: number) => n.toString().padStart(2, '0');
     const yyyy = date.getFullYear();
@@ -50,13 +51,28 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
   // Delivery Time Form
   const deliveryForm = useForm<FieldValues>({
     defaultValues: {
-      deliveryTime: formatDateTimeLocal(settings?.nextDeliveryTime),
+      deliveryTime: formatDateTimeLocal(
+        settings?.nextDeliveryTime
+          ? typeof settings.nextDeliveryTime === "string"
+            ? settings.nextDeliveryTime
+            : settings.nextDeliveryTime.toISOString()
+          : ""
+      ),
     },
   });
 
   // Keep form value in sync if settings change
   useEffect(() => {
-    deliveryForm.setValue("deliveryTime", formatDateTimeLocal(settings?.nextDeliveryTime));
+    deliveryForm.setValue(
+      "deliveryTime",
+      formatDateTimeLocal(
+        settings?.nextDeliveryTime
+          ? typeof settings.nextDeliveryTime === "string"
+            ? settings.nextDeliveryTime
+            : settings.nextDeliveryTime.toISOString()
+          : ""
+      )
+    );
   }, [settings?.nextDeliveryTime]);
 
   // WhatsApp Form
