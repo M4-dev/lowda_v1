@@ -17,7 +17,7 @@ export async function getProductPerformanceData() {
       };
     } = {};
 
-    orders.forEach((order) => {
+    orders.forEach((order: any) => {
       (order.products as any[]).forEach((product) => {
         if (!productStats[product.id]) {
           productStats[product.id] = {

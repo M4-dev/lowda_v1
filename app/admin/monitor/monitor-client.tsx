@@ -24,6 +24,7 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdatingSpf, setIsUpdatingSpf] = useState(false);
   const [isUpdatingDeliveryTime, setIsUpdatingDeliveryTime] = useState(false);
+  const [nextDeliveryEnabled, setNextDeliveryEnabled] = useState<boolean>(settings?.nextDeliveryEnabled ?? true);
   const [isUpdatingWhatsapp, setIsUpdatingWhatsapp] = useState(false);
 
   // SPF Form
@@ -73,7 +74,8 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
           : ""
       )
     );
-  }, [settings?.nextDeliveryTime]);
+    setNextDeliveryEnabled(settings?.nextDeliveryEnabled ?? true);
+  }, [settings?.nextDeliveryTime, settings?.nextDeliveryEnabled, deliveryForm]);
 
   // WhatsApp Form
   const whatsappForm = useForm<FieldValues>({
@@ -89,7 +91,7 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
     if ((settings as any)?.whatsappNumber) {
       whatsappForm.setValue("whatsappNumber", (settings as any).whatsappNumber);
     }
-  }, [settings]);
+  }, [settings, spfForm, whatsappForm]);
 
   useEffect(() => {
     // Calculate total sale, DMC, and SPF from non-reimbursed orders only
@@ -206,12 +208,15 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
     setIsUpdatingDeliveryTime(true);
     try {
       await axios.put("/api/settings/delivery-time", {
-        nextDeliveryTime: localTimeString, // send as local time string
+        nextDeliveryTime: localTimeString,
+        nextDeliveryEnabled,
       });
-      toast.success("Next delivery time set successfully");
+      toast.success("Next delivery time and visibility updated successfully");
+      // Optimistically update local state
+      setNextDeliveryEnabled(nextDeliveryEnabled);
       router.refresh();
     } catch (error) {
-      toast.error("Failed to set delivery time");
+      toast.error("Failed to update delivery time/visibility");
       console.error(error);
     } finally {
       setIsUpdatingDeliveryTime(false);
@@ -316,9 +321,19 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
               Select a date and time up to 7 days ahead
             </p>
           </div>
-          <div className="w-full sm:w-auto">
+          <div className="flex flex-col gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-2 mb-2">
+              <input
+                type="checkbox"
+                checked={nextDeliveryEnabled}
+                onChange={e => setNextDeliveryEnabled(e.target.checked)}
+                className="w-5 h-5 accent-amber-600"
+                disabled={isUpdatingDeliveryTime}
+              />
+              <span className="text-sm text-slate-700">Show Next Delivery Countdown</span>
+            </div>
             <Button
-              label={isUpdatingDeliveryTime ? "Setting..." : "Set Delivery Time"}
+              label={isUpdatingDeliveryTime ? "Setting..." : "Set Delivery Time & Visibility"}
               disabled={isUpdatingDeliveryTime}
               type="submit"
             />

@@ -41,11 +41,11 @@ export async function getUserGrowthData() {
     }
 
     // Count new users per day
-    users.forEach((user) => {
+    users.forEach((user: any) => {
       const key = moment(user.createdAt).format("YYYY-MM-DD");
       if (aggregatedData[key]) {
         aggregatedData[key].newUsers += 1;
-        
+
         // Check if repeat customer (has more than 1 order)
         if (user.orders.length > 1) {
           aggregatedData[key].repeatCustomers += 1;

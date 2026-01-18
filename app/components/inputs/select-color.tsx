@@ -36,7 +36,7 @@ const SelectColor: React.FC<SelectColorsProps> = ({
       setIsSelected(true);
       setFile(previousImages[0].image);
     }
-  }, []);
+  }, [previousImages]);
 
   const handleFileChange = useCallback((value: File) => {
     setFile(value);

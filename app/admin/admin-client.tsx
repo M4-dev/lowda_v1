@@ -5,9 +5,11 @@ import Summary from "./summary";
 import Container from "../components/container";
 import RevenueGraph from "./bar-graph";
 import { TimeRange } from "@/actions/get-revenue-graph-data";
+
 import ProductPerformanceChart from "./product-performance-chart";
 import UserGrowthChart from "./user-growth-chart";
 import OrderStatusChart from "./order-status-chart";
+import LocationGraph from "./location-graph";
 import { User, Role } from "@prisma/client";
 
 type SafeUser = Omit<User, "createdAt" | "updatedAt" | "emailVerified"> & {
@@ -24,6 +26,7 @@ export default function AdminClient({
   initialProductData,
   initialUserGrowthData,
   initialOrderStatusData,
+  initialLocationData,
   currentUser,
 }: {
   initialProducts: any[];
@@ -33,6 +36,7 @@ export default function AdminClient({
   initialProductData: any[];
   initialUserGrowthData: any[];
   initialOrderStatusData: any[];
+  initialLocationData: { address: string; orderCount: number; cancelCount: number }[];
   currentUser: SafeUser;
 }) {
   const [timeRange, setTimeRange] = useState<TimeRange>("7days");
@@ -56,6 +60,7 @@ export default function AdminClient({
 
   return (
     <div className="pt-8">
+
       <Container>
         <Summary 
           products={initialProducts} 
@@ -63,6 +68,9 @@ export default function AdminClient({
           users={initialUsers}
           userRole={currentUser.role}
         />
+
+        {/* Location Graph */}
+        <LocationGraph data={initialLocationData} />
 
         {/* Product Performance Chart - Visible to both ADMIN and MANAGER */}
         <div className="mt-8 p-6 bg-gradient-to-br from-purple-50 to-white border border-purple-200 rounded-2xl shadow-lg mx-auto max-w-[1150px]">

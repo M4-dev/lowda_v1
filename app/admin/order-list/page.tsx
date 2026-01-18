@@ -15,21 +15,12 @@ const OrderList = async ({
     return <NullData title="Oops! Access denied" />;
   }
 
-  const orderIds = searchParams.orders?.split(",") || [];
-  
-  if (orderIds.length === 0) {
-    return <NullData title="No orders selected" />;
-  }
-
   const allOrders = await getOrders();
-  
-  // Filter to only selected orders
-  const selectedOrders = allOrders.filter((order) => orderIds.includes(order.id));
 
   return (
     <div className="pt-8">
       <Container>
-        <OrderListClient orders={selectedOrders} />
+        <OrderListClient orders={allOrders} />
       </Container>
     </div>
   );

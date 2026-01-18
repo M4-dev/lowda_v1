@@ -14,6 +14,7 @@ interface ButtonProps {
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   type?: "button" | "submit" | "reset";
   roundedBottom?: boolean;
+  className?: string;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -27,6 +28,7 @@ const Button: React.FC<ButtonProps> = ({
   onClick,
   type = "button",
   roundedBottom = false,
+  className,
 }) => {
   return (
     <button
@@ -40,6 +42,7 @@ const Button: React.FC<ButtonProps> = ({
       ${small ? "text-sm font-light" : "text-md font-semibold"}
       ${small ? "py-1 px-2 border-[1px]" : "py-3 px-4 border-2"}
       ${custom ? custom : ""}
+      ${typeof className === "string" ? className : ""}
       `}
     >
       {isLoading && <CircularProgress size={22} />}

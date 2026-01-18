@@ -1,5 +1,6 @@
+
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -8,17 +9,17 @@ generator client {
 }
 
 model Account {
-  id                 String  @id @default(auto()) @map("_id") @db.ObjectId
-  userId             String  @db.ObjectId
+  id                 String  @id @default(uuid())
+  userId             String
   type               String
   provider           String
   providerAccountId  String
-  refresh_token      String?  @db.String
-  access_token       String?  @db.String
+  refresh_token      String?
+  access_token       String?
   expires_at         Int?
   token_type         String?
   scope              String?
-  id_token           String?  @db.String
+  id_token           String?
   session_state      String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -27,7 +28,7 @@ model Account {
 }
 
 model User {
-  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  id                String  @id @default(uuid())
   name              String?
   email             String?  @unique
   emailVerified     DateTime?
@@ -41,14 +42,16 @@ model User {
   accounts          Account[]
   orders            Order[]
   reviews           Review[]
+  notifications     Notification[]
 }
 
 model Product {
-  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  id                String  @id @default(uuid())
   name              String
   description       String
   price             Float
   dmc               Float   @default(0)
+  discount          Float   @default(0)
   // 'list' property removed
   brand             String
   category          String
@@ -56,14 +59,14 @@ model Product {
   stock             Int     @default(0)
   remainingStock    Int     @default(0)
   isVisible         Boolean @default(true)
-  images            Image[]
+  images            String[]
   reviews           Review[]
 }
 
 model Review {
-  id                String  @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String  @db.ObjectId
-  productId         String  @db.ObjectId
+  id                String  @id @default(uuid())
+  userId            String
+  productId         String
   rating            Int
   comment           String
   createdDate       DateTime  @default(now())
@@ -73,11 +76,12 @@ model Review {
 }
 
 model Order {
-  id                String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String?   @db.ObjectId
+  id                String    @id @default(uuid())
+  userId            String?
   guestEmail        String?
   guestName         String?
   guestToken        String?   @unique
+  guestFcmToken     String?
   amount            Float
   totalDmc          Float     @default(0)
   spf               Float     @default(0)
@@ -86,6 +90,8 @@ model Order {
   deliveryStatus    String
   paymentConfirmed  Boolean   @default(false)
   paymentClaimed    Boolean   @default(false)
+  adminConfirmedAvailability Boolean @default(false)
+  adminConfirmedAvailabilityAt DateTime?
   cancelled         Boolean   @default(false)
   cancelledAt       DateTime?
   refundAmount      Float     @default(0)
@@ -93,8 +99,8 @@ model Order {
   reimbursedAt      DateTime?
   createDate        DateTime  @default(now())
   paymentIntentId   String    @unique
-  products          CartProductType[]
-  address           Address?
+  products          String[]
+  address           String?
 
   userConfirmedDelivery   Boolean   @default(false)
   userConfirmedDeliveryAt DateTime?
@@ -102,38 +108,17 @@ model Order {
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-type CartProductType {
-  id String
-  name String
-  description String
-  category String
-  brand String
-  selectedImg Image
-  quantity Int
-  price Float
-}
 
-type Image {
-  color String
-  colorCode String
-  image String
-}
-
-type Address {
-  name    String?
-  phone   String?
-  address String?
-  hostel  String?
-}
 
 model Settings {
-  id                String    @id @default("settings") @map("_id")
+  id                String    @id @default(uuid())
   bankName          String
   bankAccountNumber String
   accountHolderName String
   hostels           String[]  @default([])
   spf               Float     @default(100)
   nextDeliveryTime  DateTime?
+  nextDeliveryEnabled Boolean @default(true)
   whatsappNumber    String?
   bannerTitle       String?
   bannerSubtitle    String?
@@ -144,23 +129,30 @@ model Settings {
   updatedAt         DateTime  @updatedAt
 }
 
+model Category {
+  id    String @id @default(uuid())
+  label String @unique
+  icon  String
+}
+
 model Notification {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  id         String   @id @default(uuid())
   title      String
   body       String
   read       Boolean  @default(false)
   createdAt  DateTime @default(now())
-  orderId    String?  @db.ObjectId
+  orderId    String?
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Reimbursement {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(uuid())
   amount    Float
   createdAt DateTime @default(now())
 }
-
 enum Role {
-    USER
-    ADMIN
-    MANAGER
+  USER
+  ADMIN
+  MANAGER
 }

@@ -1,17 +1,15 @@
 import { NextResponse } from "next/server";
 import getAdminUser from "@/actions/get-admin-user";
-import { MongoClient, ObjectId } from "mongodb";
+import prismadb from "@/libs/prismadb";
 import { notificationEmitter } from "@/libs/notification-emitter";
+import { sendPushNotification } from "@/libs/firebase-admin";
 
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const mongoClient = new MongoClient(process.env.DATABASE_URL!);
-  
   try {
     const adminUser = await getAdminUser();
-
     if (!adminUser) {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
@@ -20,15 +18,8 @@ export async function PUT(
     }
 
     const orderId = params.id;
-
-    await mongoClient.connect();
-    const db = mongoClient.db("windowshopdb");
-
-    // Get order to get userId
-    const order = await db.collection("Order").findOne({
-      _id: new ObjectId(orderId),
-    });
-
+    // Find order
+    const order = await prismadb.order.findUnique({ where: { id: orderId } });
     if (!order) {
       return NextResponse.json(
         { error: "Order not found" },
@@ -36,24 +27,12 @@ export async function PUT(
       );
     }
 
-    // Mark payment as confirmed by admin
-    const result = await db.collection("Order").findOneAndUpdate(
-      { _id: new ObjectId(orderId) },
-      {
-        $set: {
-          paymentConfirmed: true,
-          updatedAt: new Date(),
-        },
-      },
-      { returnDocument: "after" }
-    );
-
-    if (!result) {
-      return NextResponse.json(
-        { error: "Order not found" },
-        { status: 404 }
-      );
-    }
+    // Update paymentConfirmed
+    const updatedOrder = await prismadb.order.update({
+      where: { id: orderId },
+      data: { paymentConfirmed: true },
+      include: { user: true },
+    });
 
     // Emit SSE notification to customer
     notificationEmitter.emit({
@@ -63,14 +42,33 @@ export async function PUT(
       userId: order.userId, // Send to specific customer
     });
 
-    return NextResponse.json(result);
+    // Send push notification to customer (user or guest) if FCM token exists
+    try {
+      if (updatedOrder.user && updatedOrder.user.fcmToken) {
+        await sendPushNotification(
+          updatedOrder.user.fcmToken,
+          "Payment Confirmed",
+          "Your payment has been confirmed by admin. Thank you!",
+          { orderId: orderId, type: "payment_confirmed" }
+        );
+      } else if (updatedOrder.guestFcmToken) {
+        await sendPushNotification(
+          updatedOrder.guestFcmToken,
+          "Payment Confirmed",
+          "Your payment has been confirmed by admin. Thank you!",
+          { orderId: orderId, type: "payment_confirmed" }
+        );
+      }
+    } catch (error) {
+      console.error("Failed to send push notification to customer:", error);
+    }
+
+    return NextResponse.json(updatedOrder);
   } catch (error) {
     console.error("Admin confirm payment error:", error);
     return NextResponse.json(
       { error: "Failed to confirm payment" },
       { status: 500 }
     );
-  } finally {
-    await mongoClient.close();
   }
 }

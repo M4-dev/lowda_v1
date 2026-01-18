@@ -38,7 +38,7 @@ export default async function getGraphData() {
       currentDate.add(1, "day");
     }
 
-    result.forEach((entry) => {
+    result.forEach((entry: any) => {
       const day = moment(entry.createDate).format("dddd");
       const amount = entry._sum.amount || 0;
       aggregatedData[day].totalAmount += amount;

@@ -4,6 +4,7 @@ import { truncateText } from "@/utils/truncate-text";
 import { formatPrice } from "@/utils/format-price";
 import { Rating } from "@mui/material";
 import Image from "next/image";
+import ProductImage from "./product-image";
 import React, { useState } from "react";
 import Link from "next/link";
 import { productRating } from "@/utils/product-rating";
@@ -82,13 +83,26 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
           </button>
         ) : (
           data.images && data.images.length > 0 ? (
-            <Image
-              src={data.images[0].image}
-              alt={data.name}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="w-full h-full object-cover"
-              loading="eager"
+            <ProductImage
+              cartProduct={{
+                id: data.id,
+                name: data.name,
+                description: data.description,
+                category: data.category,
+                brand: data.brand,
+                selectedImg: typeof data.images[0] === 'string' ? { color: 'Default', colorCode: '#000', image: data.images[0] } : data.images[0],
+                quantity: 1,
+                price: data.price,
+                dmc: data.dmc || 0,
+                remainingStock: remaining,
+              }}
+              product={data}
+              handleColorSelect={() => {}}
+              images={data.images.map((img: any, idx: number) =>
+                typeof img === 'string'
+                  ? { color: `Variant ${idx + 1}`, colorCode: '#000', image: img }
+                  : img
+              )}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500">
@@ -124,12 +138,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
         )}
 
 
-        {/* Price */}
-        <div className="flex items-center gap-1 mt-3">
-          <div className="font-semibold text-[1.3rem]">
-            {formatPrice(data.price)}
+
+        {/* Price & Discount */}
+        {data.discount > 0 ? (
+          <div className="flex flex-col items-center gap-1 mt-3">
+            <div className="flex flex-wrap font-normal text-md text-slate-400 gap-2 mb-1 items-center justify-center">
+              <span className="line-through text-lg">{formatPrice(data.price)}</span>
+              <span className="bg-pink-600 text-white text-xs font-semibold px-2 py-1 rounded">{Math.round((data.discount / data.price) * 100)}% OFF</span>
+            </div>
+            <div className="font-bold text-[1.3rem] text-slate-800">{formatPrice(data.price - data.discount)}</div>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center gap-1 mt-3">
+            <div className="font-semibold text-[1.3rem]">
+              {formatPrice(data.price)}
+            </div>
+          </div>
+        )}
 
         <div className="mt-3">free delivery</div>
 

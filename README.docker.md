@@ -15,7 +15,7 @@ Quick start (PowerShell)
 2. Run the helper script (make sure you run PowerShell as a normal user; Administrator not required for Docker Desktop):
 
 ```powershell
-Set-Location 'C:\Users\olaba\Desktop\sit with next project\window-shop'
+Set-Location 'C:\Users\olaba\Desktop\millionare-ecom-lifeplan'
 .
 \scripts\start-mongo.ps1
 ```

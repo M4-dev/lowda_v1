@@ -7,6 +7,7 @@ import { Order } from "@prisma/client";
 import moment from "moment";
 import { Clock, Truck, Check } from "lucide-react";
 import { use, useEffect, useState } from "react";
+import axios from "axios";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
@@ -26,6 +27,26 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, guestToken }) => {
   const [bankDetails, setBankDetails] = useState<BankDetails | null>(null);
   const [hasClaimedPayment, setHasClaimedPayment] = useState(order.paymentClaimed || false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deliveryLoading, setDeliveryLoading] = useState(false);
+  const [userConfirmedDelivery, setUserConfirmedDelivery] = useState((order as any).userConfirmedDelivery || false);
+  // Delivery confirmation handler (copied from orders-client)
+  const handleDeliveryConfirmation = async (orderId: string, confirmed: boolean) => {
+    setDeliveryLoading(true);
+    try {
+      await axios.put("/api/order/confirm-delivery", {
+        orderId,
+        confirmed,
+      });
+      toast.success(confirmed ? "Delivery confirmed!" : "Confirmation removed");
+      setUserConfirmedDelivery(confirmed);
+      router.refresh();
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Failed to update confirmation");
+      console.error(error);
+    } finally {
+      setDeliveryLoading(false);
+    }
+  };
 
   const router = useRouter();
 
@@ -188,8 +209,9 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, guestToken }) => {
         </div>
         <div>Date: {moment(order.createDate).fromNow()}</div>
 
-        {/* Mark as Paid Toggle Button */}
-        {!order.paymentConfirmed && (
+        {/* Mark as Paid or Delivery Confirmation Button */}
+        {/* Show 'I have paid' only if not dispatched, otherwise show 'I have received' */}
+        {!order.paymentConfirmed && order.adminConfirmedAvailability && bankDetails && order.deliveryStatus !== "dispatched" && (
           <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
             <button
               onClick={handleMarkAsPaid}
@@ -209,15 +231,46 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, guestToken }) => {
               </p>
           </div>
         )}
+        {/* Show delivery confirmation button if dispatched */}
+        {order.deliveryStatus === "dispatched" && (
+          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+            <button
+              onClick={() => handleDeliveryConfirmation(order.id, !userConfirmedDelivery)}
+              disabled={deliveryLoading}
+              className={`px-4 py-2 rounded font-medium text-sm transition active:scale-95 ${
+                !userConfirmedDelivery
+                  ? "bg-green-100 text-green-700 border border-green-300 hover:bg-green-200"
+                  : "bg-amber-100 text-amber-700 border border-amber-300 hover:bg-amber-200"
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              {deliveryLoading
+                ? "Updating..."
+                : !userConfirmedDelivery
+                  ? "✓ I have received"
+                  : "I have not received"}
+            </button>
+            <p className="text-xs text-gray-600 mt-2">
+              {!userConfirmedDelivery
+                ? "Tick this after you have received your order."
+                : "You have marked this order as received. Click to revoke if necessary."}
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-2 sm:w-1/2">
-        {/* Bank Details Section */}
+        {/* Payment Instructions or Bank Details Section */}
         <div>
           <div className="mb-2">
-            <Heading title="Payment Details" />
+            <Heading title="Payment Instructions" />
           </div>
-          {bankDetails ? (
+          {!order.adminConfirmedAvailability ? (
+            <div className="space-y-3 p-4 bg-blue-50 border border-blue-200 rounded-md">
+              <div className="text-gray-700 text-base">
+                We are confirming the availability of what you ordered. You will see the account number to pay to once we confirm your order.
+              </div>
+            </div>
+          ) : bankDetails ? (
             <div className="space-y-3 p-4 bg-blue-50 border border-blue-200 rounded-md">
               <div>
                 <p className="text-sm text-gray-600">Bank Name</p>
@@ -267,12 +320,17 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, guestToken }) => {
               if (!order.address) {
                 return <div>No address provided</div>;
               }
-              
+              let addressObj: any = null;
+              try {
+                addressObj = typeof order.address === "string" ? JSON.parse(order.address) : order.address;
+              } catch {
+                addressObj = null;
+              }
               const parts: string[] = [];
-              if (order.address?.name) parts.push(`Name: ${order.address.name}`);
-              if (order.address?.phone) parts.push(`Phone: ${order.address.phone}`);
-              if (order.address?.address) parts.push(`Address: ${order.address.address}`);
-              if (order.address?.hostel) parts.push(order.address.hostel);
+              if (addressObj?.name) parts.push(`Name: ${addressObj.name}`);
+              if (addressObj?.phone) parts.push(`Phone: ${addressObj.phone}`);
+              if (addressObj?.address) parts.push(`Address: ${addressObj.address}`);
+              if (addressObj?.hostel) parts.push(addressObj.hostel);
 
               if (parts.length === 0) {
                 return <div>No address provided</div>;

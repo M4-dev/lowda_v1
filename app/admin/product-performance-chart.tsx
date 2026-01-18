@@ -25,7 +25,7 @@ interface ProductPerformanceChartProps {
 
 const ProductPerformanceChart: React.FC<ProductPerformanceChartProps> = ({ data }) => {
   const chartData = {
-    labels: data.map((item) => item.name.substring(0, 20)),
+    labels: data.map((item) => typeof item.name === "string" ? item.name.substring(0, 20) : ""),
     datasets: [
       {
         label: "Revenue (₦)",

@@ -83,10 +83,10 @@ export default function HomeClient({ products, currentUser, userOrders, settings
           <div className="bg-gradient-to-r from-zinc-900 to-neutral-900 rounded-lg p-6 shadow-lg mb-8 relative overflow-hidden">
             <div className="absolute inset-0 backdrop-blur-[1px] bg-black/10 flex items-center justify-center z-10">
               <div className="text-center bg-white/5 backdrop-blur-lg rounded-lg p-6 shadow-xl max-w-md border border-white/30">
-                <div className="text-4xl mb-4">🔒</div>
-                <h3 className="text-xl font-bold text-white mb-2">Sign In to Track Your Orders</h3>
-                <p className="text-white/80 mb-4">
-                  Create an account or sign in to view your order history, track deliveries, and manage your purchases.
+                <div className="text-4xl mb-1">🔒</div>
+                <h3 className="text-xl font-bold text-white mb-7">Sign In to Track Your Orders</h3>
+                <p className="text-white/80 mb-1">
+                  Create an account or sign in for advanced benefits.
                 </p>
                 <div className="flex gap-3 justify-center">
                   <a
@@ -157,6 +157,7 @@ export default function HomeClient({ products, currentUser, userOrders, settings
             discount={settings?.bannerDiscount}
             image={settings?.bannerImage || undefined}
             colors={settings?.bannerColors}
+            font={settings?.bannerFont}
           />
         )}
 

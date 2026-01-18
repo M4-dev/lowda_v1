@@ -2,7 +2,7 @@ import { MongoClient } from "mongodb";
 import { NextResponse } from "next/server";
 import getCurrentUser from "@/actions/get-current-user";
 
-const MONGO_URI = process.env.DATABASE_URL?.replace("?replicaSet=rs0", "") || "mongodb://localhost:27017/ecommerce-nextjs-app";
+const MONGO_URI = process.env.DATABASE_URL?.replace("?replicaSet=rs0", "") || "mongodb://localhost:27017/millionare-ecom-lifeplan";
 
 export async function PUT(request: Request) {
   const currentUser = await getCurrentUser();

@@ -1,3 +1,18 @@
+// Extend NextAuth session user type to include 'role'
+import { Session } from "next-auth";
+declare module "next-auth" {
+  interface Session {
+    user: {
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      role?: string;
+    };
+  }
+  interface User {
+    role?: string;
+  }
+}
 import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -60,6 +75,28 @@ export const authOptions: AuthOptions = {
     strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
+  callbacks: {
+    async session({ session, token, user }) {
+      if (session.user) {
+        // If role is missing, fetch from DB
+        if (!token.role && session.user.email) {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: session.user.email },
+          });
+          session.user.role = dbUser?.role || undefined;
+        } else {
+            session.user.role = typeof token.role === "string" ? token.role : undefined;
+        }
+      }
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+      }
+      return token;
+    },
+  },
 };
 
 export default NextAuth(authOptions);

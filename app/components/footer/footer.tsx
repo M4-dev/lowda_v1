@@ -4,16 +4,19 @@ import React from "react";
 import Container from "../container";
 import FooterList from "./footer-list";
 import Link from "next/link";
-import { categories } from "@/utils/categories";
+import { useCategories } from "@/context/category-context";
 import Categories from "./categories";
 import { MessageCircle } from "lucide-react";
+import { appConfig } from "@/config/appConfig";
 
 interface FooterProps {
   whatsappNumber?: string | null;
 }
 
 const Footer: React.FC<FooterProps> = ({ whatsappNumber = null }) => {
+
   const highlight = "hover:text-slate-50 transition";
+  const { categories, loading } = useCategories();
 
   const handleWhatsAppClick = () => {
     if (whatsappNumber) {
@@ -22,7 +25,7 @@ const Footer: React.FC<FooterProps> = ({ whatsappNumber = null }) => {
   };
 
   return (
-    <footer className="bg-zinc-900 text-slate-200 text-sm mt-16">
+    <footer style={{ background: appConfig.headerFooterBgColor }} className="text-slate-200 text-sm mt-16">
       <Container>
         <div className="px-8 flex flex-col md:flex-row justify-between pt-10 pb-4">
           <FooterList>
@@ -64,10 +67,10 @@ const Footer: React.FC<FooterProps> = ({ whatsappNumber = null }) => {
           <div className="w-full md:w-1/3 mb-6 md:mb-0">
             <h3 className="text-base font-bold mb-2">About Us</h3>
             <p className="mb-2">
-              The Easiest, Cheapest, Shop On Campus.
+              {appConfig.aboutUsDescription}
             </p>
             <p>
-              &copy; {new Date().getFullYear()} EasyByFar. All rights
+              &copy; {new Date().getFullYear()} {appConfig.appName}. All rights
               reserved.
             </p>
           </div>

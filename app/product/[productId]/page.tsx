@@ -20,7 +20,18 @@ export async function generateMetadata({ params }: { params: ItemParams }): Prom
       },
     };
   }
-  const productImage = product.images && product.images.length > 0 ? product.images[0].image : '';
+  let productImage = '';
+  if (product.images && product.images.length > 0) {
+    let imgObj: any = product.images[0];
+    if (typeof imgObj === 'string') {
+      try {
+        imgObj = JSON.parse(imgObj);
+      } catch {
+        imgObj = {};
+      }
+    }
+    productImage = imgObj.image || '';
+  }
   return {
     title: product.name,
     description: product.description,

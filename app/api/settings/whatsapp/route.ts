@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import getCurrentUser from "@/actions/get-current-user";
-import { getMongoDb } from "@/libs/mongodb";
+import prisma from "@/libs/prismadb";
 
 export async function PUT(request: Request) {
   const currentUser = await getCurrentUser();
@@ -19,17 +19,14 @@ export async function PUT(request: Request) {
       );
     }
 
-    const db = await getMongoDb();
-    await db.collection("Settings").updateOne(
-      { _id: "settings" } as any,
-      {
-        $set: {
-          whatsappNumber,
-          updatedAt: new Date(),
-        },
+
+    // Update the Settings record (assuming only one row)
+    await prisma.settings.updateMany({
+      data: {
+        whatsappNumber,
+        updatedAt: new Date(),
       },
-      { upsert: true }
-    );
+    });
 
     return NextResponse.json({ success: true, message: "WhatsApp number updated successfully" });
   } catch (error) {

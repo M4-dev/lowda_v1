@@ -1,9 +1,9 @@
-# ecommerce-nextjs-app
+# millionare-ecom-lifeplan
 
 <div>
 <h4>Language options</h4>
-  <a href="https://github.com/hernanhawryluk/ecommerce-nextjs-app/blob/main/README.es.md"><img alt="Cambiar idioma al español" src="https://img.shields.io/badge/idioma-español-yellow.svg"></a>
-  <a href="#"><img alt="Visitor Badge" src="https://visitor-badge.laobi.icu/badge?page_id=hernanhawryluk.ecommerce-nextjs-app"></a>
+  <a href="#"><img alt="Cambiar idioma al español" src="https://img.shields.io/badge/idioma-español-yellow.svg"></a>
+  <a href="#"><img alt="Visitor Badge" src="https://visitor-badge.laobi.icu/badge?page_id=millionare-ecom-lifeplan"></a>
 </div>
 <div>
   <h3>Technologies used</h3>

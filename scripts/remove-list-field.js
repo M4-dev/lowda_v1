@@ -1,36 +1,20 @@
-// Script to remove the 'list' field from all products in MongoDB
-const { MongoClient } = require('mongodb');
-require('dotenv').config();
+// Script to remove the 'list' field from all products using Prisma (PostgreSQL)
+// This script assumes the 'list' field is no longer in your schema, but old data may still exist in the database as a column.
+// It will drop the 'list' column from the Product table if it exists.
+
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 async function removeListField() {
-  const client = new MongoClient(process.env.DATABASE_URL);
   try {
-    await client.connect();
-    const db = client.db(); // Uses DB from connection string
-    // Remove from 'Product' collection
-    const resultProduct = await db.collection('Product').updateMany(
-      { list: { $exists: true } },
-      { $unset: { list: "" } }
-    );
-    const resultProductNull = await db.collection('Product').updateMany(
-      { list: { $in: [null, undefined] } },
-      { $unset: { list: "" } }
-    );
-    // Remove from 'products' collection (just in case)
-    const resultProducts = await db.collection('products').updateMany(
-      { list: { $exists: true } },
-      { $unset: { list: "" } }
-    );
-    const resultProductsNull = await db.collection('products').updateMany(
-      { list: { $in: [null, undefined] } },
-      { $unset: { list: "" } }
-    );
-    const total = resultProduct.modifiedCount + resultProductNull.modifiedCount + resultProducts.modifiedCount + resultProductsNull.modifiedCount;
-    console.log(`Removed 'list' field from ${total} products (Product & products collections).`);
+    // Remove the 'list' column from the Product table if it exists
+    // This requires a raw SQL command because Prisma schema no longer has 'list'
+    await prisma.$executeRawUnsafe(`ALTER TABLE "Product" DROP COLUMN IF EXISTS list`);
+    console.log("'list' column removed from Product table (if it existed).");
   } catch (error) {
-    console.error('Error updating products:', error);
+    console.error('Error removing list column:', error);
   } finally {
-    await client.close();
+    await prisma.$disconnect();
   }
 }
 

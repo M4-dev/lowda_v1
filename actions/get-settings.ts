@@ -15,6 +15,7 @@ export default async function getSettings() {
         hostels: [],
         spf: 100,
         nextDeliveryTime: null,
+        nextDeliveryEnabled: true,
         whatsappNumber: null,
         bannerTitle: "Summer Sale!",
         bannerSubtitle: "Enjoy discounts on selected items",
@@ -34,6 +35,7 @@ export default async function getSettings() {
       hostels: settings.hostels || [],
       spf: settings.spf || 100,
       nextDeliveryTime: settings.nextDeliveryTime || null,
+      nextDeliveryEnabled: settings.nextDeliveryEnabled ?? true,
       whatsappNumber: settings.whatsappNumber || null,
       bannerTitle: settings.bannerTitle || "Summer Sale!",
       bannerSubtitle: settings.bannerSubtitle || "Enjoy discounts on selected items",
@@ -53,6 +55,7 @@ export default async function getSettings() {
       hostels: [],
       spf: 100,
       nextDeliveryTime: null,
+      nextDeliveryEnabled: true,
       whatsappNumber: null,
       bannerTitle: "Summer Sale!",
       bannerSubtitle: "Enjoy discounts on selected items",
@@ -61,6 +64,7 @@ export default async function getSettings() {
       bannerColors: ["blue", "indigo"],
       updatedAt: new Date(),
       bannerVisible: true,
+      categories: [],
     };
   }
 }

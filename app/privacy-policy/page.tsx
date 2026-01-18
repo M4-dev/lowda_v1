@@ -1,8 +1,9 @@
 import Container from "@/app/components/container";
+import { appConfig } from "@/config/appConfig";
 
 export const metadata = {
-  title: "Privacy Policy | easyByFar",
-  description: "Read the privacy policy for easyByFar. Learn how we collect, use, and protect your personal information in compliance with Google standards.",
+  title: `Privacy Policy | ${appConfig.appName}`,
+  description: `Read the privacy policy for ${appConfig.appName}. Learn how we collect, use, and protect your personal information in compliance with Google standards.`,
 };
 
 export default function PrivacyPolicy() {
@@ -12,7 +13,7 @@ export default function PrivacyPolicy() {
         <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
         <p className="mb-4">Last updated: December 16, 2025</p>
         <p className="mb-4">
-          This Privacy Policy describes how easyByFar (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, and protects your personal information when you use our website and services. We are committed to safeguarding your privacy and complying with all applicable data protection laws, including those required by Google.
+          This Privacy Policy describes how {appConfig.appName} (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, and protects your personal information when you use our website and services. We are committed to safeguarding your privacy and complying with all applicable data protection laws, including those required by Google.
         </p>
         <h2 className="text-xl font-semibold mt-6 mb-2">1. Information We Collect</h2>
         <ul className="list-disc pl-6 mb-4">
@@ -57,7 +58,7 @@ export default function PrivacyPolicy() {
         </p>
         <h2 className="text-xl font-semibold mt-6 mb-2">9. Contact Us</h2>
         <p>
-          If you have any questions or concerns about this Privacy Policy or your personal information, please contact us at <a href="mailto:m4a.thenics@gmail.com" className="text-blue-600 underline">m4a.thenics@gmail.com</a>.
+          If you have any questions or concerns about this Privacy Policy or your personal information, please contact us at <a href={`mailto:${appConfig.contactEmail}`} className="text-blue-600 underline">{appConfig.contactEmail}</a>.
         </p>
       </Container>
     </div>

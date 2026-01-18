@@ -42,7 +42,7 @@ export async function getOrderStatusData() {
     }
 
     // Aggregate order statuses
-    orders.forEach((order) => {
+    orders.forEach((order: any) => {
       const key = moment(order.createDate).format("YYYY-MM-DD");
       
       if (aggregatedData[key]) {

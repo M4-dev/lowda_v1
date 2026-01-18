@@ -10,5 +10,5 @@
 {"t":{"$date":"2025-12-09T16:49:11.783Z"},"s":"I","c":"MONGOSH-SNIPPETS","id":1000000019,"ctx":"snippets","msg":"Loaded snippets","attr":{"installdir":"/data/db/.mongodb/mongosh/snippets"}}
 {"t":{"$date":"2025-12-09T16:49:11.786Z"},"s":"I","c":"MONGOSH","id":1000000003,"ctx":"repl","msg":"Start loading CLI scripts"}
 {"t":{"$date":"2025-12-09T16:49:11.789Z"},"s":"I","c":"MONGOSH","id":1000000013,"ctx":"repl","msg":"Evaluating script passed on the command line"}
-{"t":{"$date":"2025-12-09T16:49:11.795Z"},"s":"I","c":"MONGOSH","id":1000000007,"ctx":"repl","msg":"Evaluating input","attr":{"input":"use('ecommerce-nextjs-app'); db.Settings.findOne({ _id: 'settings' })"}}
-{"t":{"$date":"2025-12-09T16:49:11.797Z"},"s":"I","c":"MONGOSH","id":1000000008,"ctx":"shell-api","msg":"Used \"use\" command","attr":{"db":"ecommerce-nextjs-app"}}
+{"t":{"$date":"2025-12-09T16:49:11.795Z"},"s":"I","c":"MONGOSH","id":1000000007,"ctx":"repl","msg":"Evaluating input","attr":{"input":"use('millionare-ecom-lifeplan'); db.Settings.findOne({ _id: 'settings' })"}}
+{"t":{"$date":"2025-12-09T16:49:11.797Z"},"s":"I","c":"MONGOSH","id":1000000008,"ctx":"shell-api","msg":"Used \"use\" command","attr":{"db":"millionare-ecom-lifeplan"}}

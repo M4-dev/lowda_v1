@@ -16,8 +16,16 @@ const OrderGrid: React.FC<OrderGridProps> = ({ order }) => {
         <div className="justify-self-end">TOTAL</div>
       </div>
       {order.products &&
-        order.products.map((item) => {
-          return <OrderItem key={item.id} item={item} />;
+        order.products.map((itemStr, idx) => {
+          let item: any = itemStr;
+          if (typeof itemStr === "string") {
+            try {
+              item = JSON.parse(itemStr);
+            } catch {
+              item = {};
+            }
+          }
+          return <OrderItem key={item.id ?? idx} item={item} />;
         })}
     </div>
   );

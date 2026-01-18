@@ -96,6 +96,7 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
         deliveryStatus: order.deliveryStatus,
         cancelled: order.cancelled,
         userConfirmedDelivery: (order as any).userConfirmedDelivery || false,
+        adminConfirmedAvailability: (order as any).adminConfirmedAvailability || false,
       };
     });
   }
@@ -412,49 +413,9 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
       headerName: "Actions",
       width: 210,
       renderCell: (params) => {
+        const canShowActions = params.row.adminConfirmedAvailability;
         return (
           <div className="flex gap-2 flex-wrap">
-            {params.row.paymentStatus === "complete" && !params.row.paymentConfirmed && (
-              <ActionButton
-                icon={CreditCard}
-                onClick={() => {
-                  handleConfirmPayment(params.row.id);
-                }}
-                isLoading={loadingActions[`payment-${params.row.id}`]}
-                label="Confirm"
-              />
-            )}
-            {!params.row.cancelled && params.row.deliveryStatus !== "delivered" && (
-              <>
-                <ActionButton
-                  icon={Truck}
-                  onClick={() => {
-                    handleDispatch(params.row.id);
-                  }}
-                  isLoading={loadingActions[`dispatch-${params.row.id}`]}
-                  label="Dispatch"
-                />
-                {/* Only show Deliver button if user has confirmed delivery */}
-                {params.row.userConfirmedDelivery && (
-                  <ActionButton
-                    icon={Check}
-                    onClick={() => {
-                      handleDeliver(params.row.id);
-                    }}
-                    isLoading={loadingActions[`deliver-${params.row.id}`]}
-                    label="Deliver"
-                  />
-                )}
-                <ActionButton
-                  icon={XCircle}
-                  onClick={() => {
-                    handleCancelOrder(params.row.id);
-                  }}
-                  isLoading={loadingActions[`cancel-${params.row.id}`]}
-                  label="Cancel"
-                />
-              </>
-            )}
             <ActionButton
               icon={Eye}
               onClick={() => {
@@ -462,16 +423,82 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
               }}
               label="View"
             />
-            {params.row.paymentStatus === "pending" && !params.row.cancelled && (
+            {/* Confirm Availability Button */}
+            {!canShowActions && (
               <ActionButton
-                icon={Trash2}
-                onClick={() => {
-                  setNameToDelete(params.row.customer);
-                  setOrderToDelete(params.row);
-                  setOpen(true);
+                icon={Check}
+                onClick={async () => {
+                  setLoadingActions((prev) => ({ ...prev, [`confirm-availability-${params.row.id}`]: true }));
+                  try {
+                    await axios.put(`/api/admin/order/confirm-availability/${params.row.id}`);
+                    toast.success("Availability confirmed.");
+                    router.refresh();
+                  } catch (e) {
+                    toast.error("Failed to confirm availability");
+                  } finally {
+                    setLoadingActions((prev) => ({ ...prev, [`confirm-availability-${params.row.id}`]: false }));
+                  }
                 }}
-                label="Delete"
+                isLoading={loadingActions[`confirm-availability-${params.row.id}`]}
+                label="Confirm Availability"
               />
+            )}
+            {/* Only show other actions if availability is confirmed */}
+            {canShowActions && (
+              <>
+                {params.row.paymentStatus === "complete" && !params.row.paymentConfirmed && (
+                  <ActionButton
+                    icon={CreditCard}
+                    onClick={() => {
+                      handleConfirmPayment(params.row.id);
+                    }}
+                    isLoading={loadingActions[`payment-${params.row.id}`]}
+                    label="Confirm"
+                  />
+                )}
+                {!params.row.cancelled && params.row.deliveryStatus !== "delivered" && (
+                  <>
+                    <ActionButton
+                      icon={Truck}
+                      onClick={() => {
+                        handleDispatch(params.row.id);
+                      }}
+                      isLoading={loadingActions[`dispatch-${params.row.id}`]}
+                      label="Dispatch"
+                    />
+                    {/* Only show Deliver button if user has confirmed delivery */}
+                    {params.row.userConfirmedDelivery && (
+                      <ActionButton
+                        icon={Check}
+                        onClick={() => {
+                          handleDeliver(params.row.id);
+                        }}
+                        isLoading={loadingActions[`deliver-${params.row.id}`]}
+                        label="Deliver"
+                      />
+                    )}
+                    <ActionButton
+                      icon={XCircle}
+                      onClick={() => {
+                        handleCancelOrder(params.row.id);
+                      }}
+                      isLoading={loadingActions[`cancel-${params.row.id}`]}
+                      label="Cancel"
+                    />
+                  </>
+                )}
+                {params.row.paymentStatus === "pending" && !params.row.cancelled && (
+                  <ActionButton
+                    icon={Trash2}
+                    onClick={() => {
+                      setNameToDelete(params.row.customer);
+                      setOrderToDelete(params.row);
+                      setOpen(true);
+                    }}
+                    label="Delete"
+                  />
+                )}
+              </>
             )}
           </div>
         );
@@ -536,9 +563,10 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
           checkboxSelection
           disableRowSelectionOnClick
           onRowSelectionModelChange={(newSelection) => {
-            setSelectedRows(newSelection as string[]);
+            setSelectedRows(Array.from((newSelection as any).ids ?? []));
           }}
-          rowSelectionModel={selectedRows}
+          rowSelectionModel={{ type: 'include', ids: new Set(selectedRows) }}
+          getRowHeight={() => 90}
         />
       </div>
       <AlertDialog

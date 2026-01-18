@@ -3,6 +3,7 @@
 import { useCart } from "@/context/cart-context";
 import { formatPrice } from "@/utils/format-price";
 import { useState, useEffect } from "react";
+import { requestNotificationPermission } from "@/libs/firebase-messaging";
 import toast from "react-hot-toast";
 import Heading from "../components/heading";
 import Button from "../components/button";
@@ -10,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { X, Info } from "lucide-react";
 
 interface CheckoutFormProps {
-  handleSetPaymentSuccess: (value: boolean, deliveryInfo?: { name: string; phone: string; address: string; hostel?: string }) => void;
+  handleSetPaymentSuccess: (value: boolean, deliveryInfo?: { name: string; phone: string; address: string; hostel?: string }, orderId?: string) => void;
   spf: number;
   currentUser?: any;
 }
@@ -32,6 +33,17 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [bankDetails, setBankDetails] = useState<BankDetails | null>(null);
   const [showGuestBanner, setShowGuestBanner] = useState(!currentUser);
+  const [guestFcmToken, setGuestFcmToken] = useState<string | null>(null);
+
+  // Request FCM token for guests on mount
+  useEffect(() => {
+    if (!currentUser) {
+      requestNotificationPermission().then((token) => {
+        if (token) setGuestFcmToken(token);
+      });
+    }
+  }, [currentUser]);
+
   const [formData, setFormData] = useState({
     name: currentUser?.name || "",
     email: currentUser?.email || "",
@@ -78,26 +90,30 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
     setIsLoading(true);
 
     try {
-      // If guest checkout, create order with guest info
-      if (!currentUser) {
-        const response = await fetch("/api/create-payment-intent", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            items: cartProducts,
-            guestEmail: formData.email,
-            guestName: formData.name,
-          }),
-        });
+      const response = await fetch("/api/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: cartProducts,
+          guestEmail: formData.email,
+          guestName: formData.name,
+          address: formData.address,
+          hostel: formData.hostel,
+          phone: formData.phone,
+          spf: spf,
+          guestFcmToken: !currentUser ? guestFcmToken : undefined,
+        }),
+      });
 
-        if (!response.ok) {
-          throw new Error("Failed to create order");
-        }
+      if (!response.ok) {
+        throw new Error("Failed to create order");
       }
+
+      const order = await response.json();
 
       toast.success("Order made successfully!");
       handleClearCart();
-      handleSetPaymentSuccess(true, formData);
+      handleSetPaymentSuccess(true, formData, order.orderId);
     } catch (error) {
       toast.error("Payment failed. Please try again.");
     } finally {
@@ -184,7 +200,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Hostel *</label>
+              <label className="block text-sm font-medium mb-2">Location *</label>
               <select
                 name="hostel"
                 value={formData.hostel}
@@ -192,7 +208,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               >
-                <option value="">Select a hostel</option>
+                <option value="">Select a location</option>
                 {bankDetails?.hostels?.map((hostel, index) => (
                   <option key={index} value={hostel}>
                     {hostel}
@@ -201,7 +217,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
               </select>
               {bankDetails && bankDetails.hostels && bankDetails.hostels.length === 0 && (
                 <p className="text-xs text-red-500 mt-1">
-                  No hostels available. Please contact admin.
+                  No locations available. Please contact admin.
                 </p>
               )}
             </div>
@@ -225,29 +241,20 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           </div>
         </div>
 
-        {/* Bank Payment Information */}
+        {/* Payment Instructions or Bank Details Section */}
         <div>
-          <h2 className="font-semibold mb-4">Payment Details</h2>
-          {bankDetails ? (
-            <div className="space-y-3 p-4 bg-blue-50 border border-blue-200 rounded-md">
-              <div>
-                <p className="text-sm text-gray-600">Bank Name</p>
-                <p className="text-lg font-semibold text-gray-800">{bankDetails.bankName || "Not configured"}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Account Holder</p>
-                <p className="text-lg font-semibold text-gray-800">{bankDetails.accountHolderName || "Not configured"}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Account Number</p>
-                <p className="text-lg font-semibold text-gray-800">{bankDetails.bankAccountNumber || "Not configured"}</p>
-              </div>
+          <h2 className="font-semibold mb-4">Payment Instructions</h2>
+          {/* Show payment instructions until admin confirms, then show bank details */}
+          {/* We do not have paymentConfirmed state here, so always show instructions */}
+          <div className="space-y-3 p-4 bg-blue-50 border border-blue-200 rounded-md">
+            <div className="text-gray-700 text-base">
+              Place your order and we will confirm availability of what you want to buy before showing you the account number to pay to.
             </div>
-          ) : (
-            <div className="p-4 bg-gray-100 border border-gray-300 rounded-md text-gray-700">
-              Loading payment details...
-            </div>
-          )}
+          </div>
+          {/*
+          // If you want to show bank details after admin confirmation, you need to fetch order/paymentConfirmed state here.
+          // For now, always show instructions as per requirements.
+          */}
         </div>
       </div>
 

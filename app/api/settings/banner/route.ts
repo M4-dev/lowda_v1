@@ -12,7 +12,7 @@ export async function PUT(request: Request) {
 
   try {
     const body = await request.json();
-    const { bannerTitle, bannerSubtitle, bannerDiscount, bannerImage, bannerColors, bannerVisible } = body;
+    const { bannerTitle, bannerSubtitle, bannerDiscount, bannerImage, bannerColors, bannerVisible, nextDeliveryEnabled } = body;
 
     if (!bannerTitle || !bannerSubtitle || !bannerDiscount) {
       return NextResponse.json({ error: "All banner fields are required" }, { status: 400 });
@@ -35,6 +35,9 @@ export async function PUT(request: Request) {
     if (typeof bannerVisible === 'boolean') {
       updateData.bannerVisible = bannerVisible;
     }
+    if (typeof nextDeliveryEnabled === 'boolean') {
+      updateData.nextDeliveryEnabled = nextDeliveryEnabled;
+    }
 
     await prisma.settings.upsert({
       where: { id: "settings" },
@@ -46,6 +49,7 @@ export async function PUT(request: Request) {
         accountHolderName: "",
         ...updateData,
         bannerVisible: typeof bannerVisible === 'boolean' ? bannerVisible : true,
+        nextDeliveryEnabled: typeof nextDeliveryEnabled === 'boolean' ? nextDeliveryEnabled : true,
       },
     });
 

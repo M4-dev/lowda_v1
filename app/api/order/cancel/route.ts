@@ -1,14 +1,11 @@
-import { MongoClient, ObjectId } from "mongodb";
+
 import { NextResponse } from "next/server";
 import getCurrentUser from "@/actions/get-current-user";
-
-const MONGO_URI = process.env.DATABASE_URL?.replace("?replicaSet=rs0", "") || "mongodb://localhost:27017/ecommerce-nextjs-app";
+import prismadb from "@/libs/prismadb";
 
 export async function PUT(request: Request) {
   const currentUser = await getCurrentUser();
-
   if (!currentUser) return NextResponse.error();
-
   if (currentUser.role !== "ADMIN") {
     return NextResponse.error();
   }
@@ -16,62 +13,55 @@ export async function PUT(request: Request) {
   const body = await request.json();
   const { orderId } = body;
 
-  const mongoClient = new MongoClient(MONGO_URI);
-  await mongoClient.connect();
-  const db = mongoClient.db("windowshopdb");
-
   try {
     // Get the order
-    const order = await db.collection("Order").findOne({ _id: new ObjectId(orderId) });
-
+    const order = await prismadb.order.findUnique({ where: { id: orderId } });
     if (!order) {
-      await mongoClient.close();
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
-
     if (order.cancelled) {
-      await mongoClient.close();
       return NextResponse.json({ error: "Order already cancelled" }, { status: 400 });
     }
 
     // Restore stock for each product
-    for (const item of order.products || []) {
-      await db.collection("Product").updateOne(
-        { _id: new ObjectId(item.id) },
-        { 
-          $inc: { remainingStock: item.quantity },
-          $set: { updatedAt: new Date() }
-        }
-      );
+    for (const itemStr of order.products || []) {
+      let item: any;
+      try {
+        item = typeof itemStr === "string" ? JSON.parse(itemStr) : itemStr;
+      } catch {
+        item = null;
+      }
+      if (item && item.id && item.quantity) {
+        await prismadb.product.update({
+          where: { id: item.id },
+          data: {
+            remainingStock: { increment: item.quantity }
+          }
+        });
+      }
     }
 
     // Calculate refund amount (only if payment was confirmed)
     const refundAmount = order.paymentConfirmed ? order.amount : 0;
 
     // Update order to cancelled
-    await db.collection("Order").updateOne(
-      { _id: new ObjectId(orderId) },
-      { 
-        $set: { 
-          cancelled: true,
-          cancelledAt: new Date(),
-          refundAmount: refundAmount,
-          status: "cancelled",
-          deliveryStatus: "cancelled",
-          updatedAt: new Date()
-        } 
+    await prismadb.order.update({
+      where: { id: orderId },
+      data: {
+        cancelled: true,
+        cancelledAt: new Date(),
+        refundAmount: refundAmount,
+        status: "cancelled",
+        deliveryStatus: "cancelled"
       }
-    );
+    });
 
-    await mongoClient.close();
-
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: "Order cancelled successfully",
       refundAmount: refundAmount
     });
   } catch (error) {
-    await mongoClient.close();
     console.error("Cancel order error:", error);
     return NextResponse.json({ error: "Failed to cancel order" }, { status: 500 });
   }

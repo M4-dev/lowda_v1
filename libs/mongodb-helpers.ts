@@ -1,6 +1,6 @@
 import { MongoClient, ObjectId, Document } from "mongodb";
 
-const DATABASE_NAME = "ecommerce-nextjs-app";
+const DATABASE_NAME = "millionare-ecom-lifeplan";
 
 export async function withMongo<T>(
   callback: (db: any) => Promise<T>

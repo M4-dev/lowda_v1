@@ -5,7 +5,9 @@ import getUsers from "@/actions/get-users";
 import getRevenueGraphData from "@/actions/get-revenue-graph-data";
 import getProductPerformanceData from "@/actions/get-product-performance-data";
 import getUserGrowthData from "@/actions/get-user-growth-data";
+
 import getOrderStatusData from "@/actions/get-order-status-data";
+import getOrderLocations from "@/actions/get-order-locations";
 import AdminClient from "./admin-client";
 
 export const dynamic = 'force-dynamic';
@@ -13,6 +15,7 @@ export const revalidate = 0;
 
 const Admin = async () => {
   const currentUser = await getManagerUser();
+
 
   const [
     products,
@@ -22,6 +25,7 @@ const Admin = async () => {
     productData,
     userGrowthData,
     orderStatusData,
+    locationData,
   ] = await Promise.all([
     getProducts({ category: null }),
     getOrders(),
@@ -30,6 +34,7 @@ const Admin = async () => {
     getProductPerformanceData(),
     getUserGrowthData(),
     getOrderStatusData(),
+    getOrderLocations(),
   ]);
 
   return (
@@ -41,6 +46,7 @@ const Admin = async () => {
       initialProductData={productData}
       initialUserGrowthData={userGrowthData}
       initialOrderStatusData={orderStatusData}
+      initialLocationData={locationData}
       currentUser={currentUser}
     />
   );

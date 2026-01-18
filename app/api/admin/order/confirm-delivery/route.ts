@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import getAdminUser from "@/actions/get-admin-user";
 import prisma from "@/libs/prismadb";
+import { sendPushNotification } from "@/libs/firebase-admin";
 
 export async function PUT(request: Request) {
   const adminUser = await getAdminUser();
@@ -34,7 +35,18 @@ export async function PUT(request: Request) {
       data: {
         deliveryStatus: "delivered",
       },
+      include: { user: true },
     });
+
+    // Send push notification to customer if available
+    if (updatedOrder.user?.fcmToken) {
+      await sendPushNotification(
+        updatedOrder.user.fcmToken,
+        "Order Complete",
+        "Your order is complete. Thank you!",
+        { orderId: updatedOrder.id }
+      );
+    }
 
     return NextResponse.json(updatedOrder);
   } catch (error) {

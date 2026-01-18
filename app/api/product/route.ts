@@ -21,12 +21,19 @@ export async function POST(request: Request) {
     images,
     stock,
     isVisible,
+    discount,
   } = body;
+
+  // Ensure images is an array of strings (URLs)
+  const imageUrls = Array.isArray(images)
+    ? images.map((img: any) => typeof img === "string" ? img : img.url || img.image).filter(Boolean)
+    : [];
 
   const stockNum = stock ? parseInt(stock as any, 10) : 0;
   const remaining = stockNum;
   const inStockFlag = remaining > 0;
   const dmcValue = dmc ? parseFloat(dmc) : 0;
+  const discountValue = discount ? parseFloat(discount) : 0;
 
   try {
     const product = await prisma.product.create({
@@ -39,9 +46,10 @@ export async function POST(request: Request) {
         stock: stockNum,
         remainingStock: remaining,
         isVisible: isVisible !== undefined ? isVisible : true,
-        images,
+        images: imageUrls,
         price: parseFloat(price),
         dmc: dmcValue,
+        discount: discountValue,
       },
     });
 
@@ -65,11 +73,17 @@ export async function PUT(request: Request) {
   }
   
   const body = await request.json();
-  const { id, inStock, isVisible } = body;
+  const { id, inStock, isVisible, discount, images } = body;
 
   const updateData: any = {};
   if (inStock !== undefined) updateData.inStock = inStock;
   if (isVisible !== undefined) updateData.isVisible = isVisible;
+  if (discount !== undefined) updateData.discount = parseFloat(discount);
+  if (images !== undefined) {
+    updateData.images = Array.isArray(images)
+      ? images.map((img: any) => typeof img === "string" ? img : img.url || img.image).filter(Boolean)
+      : [];
+  }
 
   try {
     const product = await prisma.product.update({

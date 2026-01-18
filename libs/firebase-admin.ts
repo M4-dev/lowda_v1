@@ -93,45 +93,77 @@ export const sendMulticastNotification = async (
   body: string,
   data?: { [key: string]: string }
 ) => {
-  try {
-    const message = {
-      notification: {
-        title,
-        body,
-      },
-      data: data || {},
-      tokens,
-      android: {
-        priority: 'high' as const,
+  if (!tokens || tokens.length === 0) {
+    console.log("No tokens provided for multicast notification. Skipping send.");
+    return { successCount: 0, failureCount: 0, responses: [] };
+  }
+
+  // Firebase Admin SDK's sendEachForMulticast has a limit of 500 tokens per call.
+  // We chunk the tokens into batches of 500 to handle large numbers of users.
+  const tokenChunks: string[][] = [];
+  for (let i = 0; i < tokens.length; i += 500) {
+    tokenChunks.push(tokens.slice(i, i + 500));
+  }
+
+  let totalSuccessCount = 0;
+  let totalFailureCount = 0;
+  const allResponses: admin.messaging.SendResponse[] = [];
+
+  for (const chunk of tokenChunks) {
+    try {
+      const message = {
         notification: {
-          sound: 'default',
-          priority: 'high' as const,
+          title,
+          body,
         },
-      },
-      apns: {
-        payload: {
-          aps: {
+        data: data || {},
+        tokens: chunk,
+        android: {
+          priority: 'high' as const,
+          notification: {
             sound: 'default',
-            badge: 1,
+            priority: 'high' as const,
           },
         },
-      },
-      webpush: {
-        notification: {
-          icon: '/icon-192x192.png',
-          badge: '/icon-96x96.png',
-          requireInteraction: true,
+        apns: {
+          payload: {
+            aps: {
+              sound: 'default',
+              badge: 1,
+            },
+          },
         },
-      },
-    };
+        webpush: {
+          notification: {
+            icon: '/icon-192x192.png',
+            badge: '/icon-96x96.png',
+            requireInteraction: true,
+          },
+        },
+      };
 
-    const response = await admin.messaging().sendEachForMulticast(message);
-    console.log(`${response.successCount} messages sent successfully`);
-    return response;
-  } catch (error) {
-    console.error('Error sending multicast notification:', error);
-    throw error;
+      const response = await admin.messaging().sendEachForMulticast(message);
+      totalSuccessCount += response.successCount;
+      totalFailureCount += response.failureCount;
+      if (response.responses) {
+        allResponses.push(...response.responses);
+      }
+    } catch (error) {
+      console.error('Error sending multicast notification chunk:', error);
+      // If a whole chunk fails, count all tokens in it as failures.
+      totalFailureCount += chunk.length;
+    }
   }
+
+  console.log(
+    `Total multicast notifications sent: ${totalSuccessCount} success, ${totalFailureCount} failure.`
+  );
+
+  return {
+    responses: allResponses,
+    successCount: totalSuccessCount,
+    failureCount: totalFailureCount,
+  };
 };
 
 export function getAdminStorage() {

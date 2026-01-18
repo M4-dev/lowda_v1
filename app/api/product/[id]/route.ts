@@ -63,13 +63,18 @@ export async function PUT(
   const inStockFlag = remainingNum !== undefined ? remainingNum > 0 : inStock;
   const dmcValue = dmc !== undefined ? parseFloat(dmc) : undefined;
 
+  // Prepare images as simple URL array
+  const imageUrls = Array.isArray(images)
+    ? images.map((img: any) => typeof img === "string" ? img : img.url || img.image).filter(Boolean)
+    : [];
+
   const updateData: any = {
     name,
     description,
     brand,
     category,
-    images,
     price: parseFloat(price),
+    images: imageUrls,
   };
 
   if (dmcValue !== undefined) updateData.dmc = dmcValue;

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Spinner from "@/app/components/spinner";
 import Container from "../container";
 import AdminNavItem from "./admin-nav-item";
 import {
@@ -15,20 +16,30 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import AdminNotifications from "./admin-notifications";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const AdminNav = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Fetch current user role
     fetch('/api/current-user-role')
       .then(res => res.json())
       .then(data => setUserRole(data.role))
       .catch(() => setUserRole(null));
   }, []);
+
+  // Show spinner on link click, hide when pathname changes (navigation complete)
+  useEffect(() => {
+    setLoading(false);
+  }, [pathname]);
+
+  const handleNavClick = () => {
+    setLoading(true);
+  };
 
   const isManager = userRole === "MANAGER";
 
@@ -36,7 +47,12 @@ const AdminNav = () => {
     <div className="w-full shadow-xl border-b-[0.5px] bg-slate-300">
       <Container>
         <div className="flex flex-wrap items-center pt-1 justify-start md:justify-start gap-4 md:gap-12 overflow-x-auto">
-          <Link href={"/admin"}>
+          {loading && (
+            <div className="flex items-center justify-center w-full py-2">
+              <Spinner size={28} />
+            </div>
+          )}
+          <Link href={"/admin"} onClick={handleNavClick}>
             <AdminNavItem
               label="Summary"
               icon={LayoutDashboard}
@@ -45,56 +61,63 @@ const AdminNav = () => {
           </Link>
           {!isManager && (
             <>
-              <Link href={"/admin/add-products"}>
+              <Link href={"/admin/add-products"} onClick={handleNavClick}>
                 <AdminNavItem
                   label="Add Products"
                   icon={PlusSquare}
                   selected={pathname === "/admin/add-products"}
                 />
               </Link>
-              <Link href={"/admin/manage-products"}>
+              <Link href={"/admin/manage-products"} onClick={handleNavClick}>
                 <AdminNavItem
                   label="Manage Products"
                   icon={Package}
                   selected={pathname === "/admin/manage-products"}
                 />
               </Link>
-              <Link href={"/admin/manage-orders"}>
+              <Link href={"/admin/manage-orders"} onClick={handleNavClick}>
                 <AdminNavItem
                   label="Manage Orders"
                   icon={List}
                   selected={pathname === "/admin/manage-orders"}
                 />
               </Link>
-              <Link href={"/admin/manage-users"}>
+              <Link href={"/admin/manage-users"} onClick={handleNavClick}>
                 <AdminNavItem
                   label="Manage Users"
                   icon={Users}
                   selected={pathname === "/admin/manage-users"}
                 />
               </Link>
-              <Link href={"/admin/monitor"}>
+              <Link href={"/admin/monitor"} onClick={handleNavClick}>
                 <AdminNavItem
                   label="Monitor"
                   icon={Monitor}
                   selected={pathname === "/admin/monitor"}
                 />
               </Link>
-              <Link href={"/admin/manage-bank-details"}>
+              <Link href={"/admin/manage-bank-details"} onClick={handleNavClick}>
                 <AdminNavItem
                   label="Bank Details"
                   icon={Building2}
                   selected={pathname === "/admin/manage-bank-details"}
                 />
               </Link>
-              <Link href={"/admin/manage-hostels"}>
+              <Link href={"/admin/manage-hostels"} onClick={handleNavClick}>
                 <AdminNavItem
-                  label="Hostels"
+                  label="Locations"
                   icon={Home}
                   selected={pathname === "/admin/manage-hostels"}
                 />
               </Link>
-              <Link href={" /admin/manage-banner"}>
+              <Link href={"/admin/category"} onClick={handleNavClick}>
+                <AdminNavItem
+                  label="Categories"
+                  icon={LayoutGrid}
+                  selected={pathname === "/admin/category"}
+                />
+              </Link>
+              <Link href={"/admin/manage-banner"} onClick={handleNavClick}>
                 <AdminNavItem
                   label="Banner"
                   icon={LayoutGrid}

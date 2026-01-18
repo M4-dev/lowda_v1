@@ -55,7 +55,7 @@ export async function getRevenueGraphData(timeRange: TimeRange = "7days") {
     }
 
     // Aggregate order data
-    orders.forEach((order) => {
+    orders.forEach((order: any) => {
       const key = moment(order.createDate).format(groupFormat);
       
       if (aggregatedData[key]) {

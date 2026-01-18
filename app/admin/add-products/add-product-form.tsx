@@ -3,11 +3,12 @@
 import Button from "@/app/components/button";
 import Header from "@/app/components/heading";
 import CategoryInput from "@/app/components/inputs/category-input";
+import { CATEGORY_ICONS } from "@/app/actions/category-icons";
 import CustomCheckbox from "@/app/components/inputs/custom-checkbox";
 import Input from "@/app/components/inputs/input";
 import SelectColor from "@/app/components/inputs/select-color";
 import TextArea from "@/app/components/inputs/text-area";
-import { categories } from "@/utils/categories";
+// import { categories } from "@/utils/categories";
 import { colors } from "@/utils/colors";
 import { useCallback, useEffect, useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
@@ -30,8 +31,31 @@ export type UploadedImageType = {
 const AddProductForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [images, setImages] = useState<ImageType[] | null>();
+  const [images, setImages] = useState<ImageType[]>([]);
   const [isProductCreated, setIsProductCreated] = useState(false);
+  const [categories, setCategories] = useState<{ label: string; icon: string }[]>([]);
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch("/api/category");
+        if (!res.ok) throw new Error("Failed to fetch categories");
+        const data = await res.json();
+        // Always include 'All' category at the start
+        const allCategory = { label: "All", icon: "Circle" };
+        if (!data || !Array.isArray(data) || data.length === 0) {
+          setCategories([allCategory]);
+        } else {
+          // Remove any duplicate 'All' if present
+          const filtered = data.filter((cat) => cat.label !== "All");
+          setCategories([allCategory, ...filtered]);
+        }
+      } catch (err) {
+        setCategories([{ label: "All", icon: "Circle" }]);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const {
     register,
@@ -52,28 +76,29 @@ const AddProductForm = () => {
       images: [],
       price: "",
       dmc: "",
+      discount: "",
     },
   });
 
-  const setCustomValue = (id: string, value: any) => {
+  const setCustomValue = useCallback((id: string, value: any) => {
     setValue(id, value, {
       shouldValidate: true,
       shouldDirty: true,
       shouldTouch: true,
     });
-  };
+  }, [setValue]);
 
   useEffect(() => {
     setCustomValue("images", images);
-  }, [images]);
+  }, [images, setCustomValue]);
 
   useEffect(() => {
     if (isProductCreated) {
       reset();
-      setImages(null);
+      setImages([]);
       setIsProductCreated(false);
     }
-  }, [isProductCreated]);
+  }, [isProductCreated, reset]);
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     setIsLoading(true);
@@ -131,13 +156,21 @@ const AddProductForm = () => {
     }
 
     const dmc = data.dmc === "" || data.dmc === 0 ? 0 : Number(data.dmc);
+    const discount = data.discount === "" || data.discount === 0 ? 0 : Number(data.discount);
 
     const { list, ...rest } = data;
+    // Always include 'All' as a category for every product, plus the selected category if not 'All'
+    let productCategories = ['All'];
+    if (rest.category && rest.category !== 'All') {
+      productCategories.push(rest.category);
+    }
     const productData = {
       ...rest,
-      images: uploadedImages,
+      images: uploadedImages.map(img => img.image),
       dmc: dmc,
+      discount: discount,
       stock: data.stock ? Number(data.stock) : 0,
+      categories: productCategories,
     };
 
     axios
@@ -234,6 +267,14 @@ const AddProductForm = () => {
             required
           />
           <Input
+            id="discount"
+            label="Discount (₦)"
+            disabled={isLoading}
+            register={register}
+            errors={errors}
+            type="number"
+          />
+          <Input
             id="dmc"
             label="DMC (₦)"
             disabled={isLoading}
@@ -269,17 +310,24 @@ const AddProductForm = () => {
         <h3 className="text-lg font-semibold mb-4 text-slate-700">Category</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {categories.map((item) => {
+            let Icon = CATEGORY_ICONS.find(i => i.name === "Tag")?.icon;
             if (item.label === "All") {
-              return null;
+              Icon = CATEGORY_ICONS.find(i => i.name === "Store")?.icon;
+            } else if (item.icon) {
+              const foundIcon = CATEGORY_ICONS.find(i => i.name === item.icon)?.icon;
+              if (foundIcon) Icon = foundIcon;
             }
-
+            // Final fallback to Tag if still undefined
+            if (!Icon) {
+              Icon = CATEGORY_ICONS.find(i => i.name === "Tag")!.icon;
+            }
             return (
               <div key={item.label}>
                 <CategoryInput
                   onClick={(category) => setCustomValue("category", category)}
                   selected={category === item.label}
                   label={item.label}
-                  icon={item.icon}
+                  icon={Icon}
                 />
               </div>
             );

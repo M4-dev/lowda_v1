@@ -7,6 +7,7 @@ import getProductPerformanceData from "@/actions/get-product-performance-data";
 import getUserGrowthData from "@/actions/get-user-growth-data";
 import getOrderStatusData from "@/actions/get-order-status-data";
 import AdminClient from "./admin-client";
+// If location data is not needed, provide an empty array for type safety
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -41,6 +42,7 @@ const Admin = async () => {
       initialProductData={productData}
       initialUserGrowthData={userGrowthData}
       initialOrderStatusData={orderStatusData}
+      initialLocationData={[]}
       currentUser={currentUser}
     />
   );

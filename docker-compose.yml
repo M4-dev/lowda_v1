@@ -9,7 +9,7 @@ services:
     volumes:
       - ./data/db:/data/db
     environment:
-      - MONGO_INITDB_DATABASE=ecommerce-nextjs-app
+      - MONGO_INITDB_DATABASE=millionare-ecom-lifeplan
     command: ["--replSet", "rs0", "--bind_ip_all"]
 
   mongo-init:

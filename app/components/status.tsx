@@ -13,14 +13,17 @@ const Status: React.FC<StatusProps> = ({ text, icon: Icon, bg, color }) => {
       className={`
     ${bg}
     ${color}
-    px-2
+    px-1.5
+    py-0.5
+    my-1
     rounded
     flex
     items-center
     gap-1
+    text-xs
     `}
     >
-      {text} <Icon size={15} />
+      {text} <Icon size={12} />
     </div>
   );
 };

@@ -1,9 +1,9 @@
 // Script to print count and IDs of notifications with null or missing title
-const { MongoClient } = require('mongodb');
+// const { MongoClient } = require('mongodb'); // MongoDB code removed: now using PostgreSQL with Prisma
 
 async function main() {
-  const uri = process.env.DATABASE_URL || 'YOUR_MONGODB_URI_HERE';
-  const client = new MongoClient(uri);
+  // const uri = process.env.DATABASE_URL || 'YOUR_MONGODB_URI_HERE';
+  // const client = new MongoClient(uri); // MongoDB client removed: now using PostgreSQL with Prisma
   try {
     await client.connect();
     const db = client.db('windowshopdb');

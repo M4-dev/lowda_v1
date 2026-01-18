@@ -1,13 +1,13 @@
 import { MongoClient } from "mongodb";
 
-const SEED_DB_URL = process.env.DATABASE_URL?.replace("?replicaSet=rs0", "") || "mongodb://mongo:27017/ecommerce-nextjs-app";
+const SEED_DB_URL = process.env.DATABASE_URL?.replace("?replicaSet=rs0", "") || "mongodb://mongo:27017/millionare-ecom-lifeplan";
 
 async function fixOrders() {
   const mongoClient = new MongoClient(SEED_DB_URL);
   await mongoClient.connect();
   
   try {
-    const db = mongoClient.db("ecommerce-nextjs-app");
+    const db = mongoClient.db("millionare-ecom-lifeplan");
     
     // Find orders without createDate
     const ordersWithoutCreateDate = await db.collection("Order").find({ createDate: null }).toArray();

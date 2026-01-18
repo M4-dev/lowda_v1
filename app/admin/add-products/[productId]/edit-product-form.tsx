@@ -3,11 +3,12 @@
 import Button from "@/app/components/button";
 import Header from "@/app/components/heading";
 import CategoryInput from "@/app/components/inputs/category-input";
+import * as Icons from "lucide-react";
 import CustomCheckbox from "@/app/components/inputs/custom-checkbox";
 import Input from "@/app/components/inputs/input";
 import SelectColor from "@/app/components/inputs/select-color";
 import TextArea from "@/app/components/inputs/text-area";
-import { categories } from "@/utils/categories";
+// import { categories } from "@/utils/categories";
 import { colors } from "@/utils/colors";
 import { useCallback, useEffect, useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
@@ -33,19 +34,37 @@ const EditProductForm = ({ product }: { product: Product }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState<ImageType[] | null>();
   const [oldImages, setOldImages] = useState<UploadedImageType[]>();
+  const [categories, setCategories] = useState<{ label: string; icon: string }[]>([]);
 
+  // Helper to get icon component from string
+  const getIconComponent = (iconName: string) => {
+    // Fallback to Circle if not found
+    return (Icons as any)[iconName] || Icons.Circle;
+  };
+
+  // Fetch categories from API
   useEffect(() => {
-    setCustomValue("name", product.name);
-    setCustomValue("description", product.description);
-    setCustomValue("brand", product.brand);
-    setCustomValue("category", product.category);
-    setCustomValue("inStock", product.inStock);
-    setCustomValue("stock", (product as any).stock ?? (product as any).remainingStock ?? 0);
-    setCustomValue("isVisible", (product as any).isVisible ?? true);
-    setCustomValue("price", product.price);
-    setCustomValue("dmc", (product as any).dmc || 0);
-    setOldImages(product.images);
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch("/api/category");
+        if (!res.ok) throw new Error("Failed to fetch categories");
+        const data = await res.json();
+        // Always include 'All' category at the start
+        const allCategory = { label: "All", icon: "Circle" };
+        if (!data || !Array.isArray(data) || data.length === 0) {
+          setCategories([allCategory]);
+        } else {
+          // Remove any duplicate 'All' if present
+          const filtered = data.filter((cat) => cat.label !== "All");
+          setCategories([allCategory, ...filtered]);
+        }
+      } catch (err) {
+        setCategories([{ label: "All", icon: "Circle" }]);
+      }
+    };
+    fetchCategories();
   }, []);
+
 
   const {
     register,
@@ -65,20 +84,42 @@ const EditProductForm = ({ product }: { product: Product }) => {
       images: [],
       price: "",
       dmc: "",
+      discount: "",
     },
   });
 
-  const setCustomValue = (id: string, value: any) => {
+  const setCustomValue = useCallback((id: string, value: any) => {
     setValue(id, value, {
       shouldValidate: true,
       shouldDirty: true,
       shouldTouch: true,
     });
-  };
+  }, [setValue]);
+
+  useEffect(() => {
+    setCustomValue("name", product.name);
+    setCustomValue("description", product.description);
+    setCustomValue("brand", product.brand);
+    setCustomValue("category", product.category);
+    setCustomValue("inStock", product.inStock);
+    setCustomValue("stock", (product as any).stock ?? (product as any).remainingStock ?? 0);
+    setCustomValue("isVisible", (product as any).isVisible ?? true);
+    setCustomValue("price", product.price);
+    setCustomValue("dmc", (product as any).dmc || 0);
+    setOldImages(
+      Array.isArray(product.images)
+        ? product.images.map((img: string) => ({
+            color: "",
+            colorCode: "",
+            image: img,
+          }))
+        : []
+    );
+  }, [product, setCustomValue]);
 
   useEffect(() => {
     setCustomValue("images", images);
-  }, [images]);
+  }, [images, setCustomValue]);
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     setIsLoading(true);
@@ -89,7 +130,9 @@ const EditProductForm = ({ product }: { product: Product }) => {
       return toast.error("Category is not selected!");
     }
 
-    if (oldImages?.length === 0) {
+    const hasOldImages = oldImages && oldImages.length > 0;
+    const hasNewImages = data.images && data.images.length > 0;
+    if (!hasOldImages && !hasNewImages) {
       setIsLoading(false);
       return toast.error("No selected image!");
     }
@@ -170,10 +213,12 @@ const EditProductForm = ({ product }: { product: Product }) => {
     const dmc = data.dmc === "" || data.dmc === 0 ? 0 : Number(data.dmc);
 
     // 4. Save only the uploadedImages (new + kept)
+    const discount = data.discount === "" || data.discount === 0 ? 0 : Number(data.discount);
     const productData = {
       ...data,
-      images: uploadedImages,
+      images: uploadedImages.map(img => img.image),
       dmc: dmc,
+      discount: discount,
       stock: data.stock !== undefined ? Number(data.stock) : undefined,
       remainingStock:
         data.remainingStock !== undefined
@@ -243,6 +288,14 @@ const EditProductForm = ({ product }: { product: Product }) => {
           required
         />
         <Input
+          id="discount"
+          label="Discount"
+          disabled={isLoading}
+          register={register}
+          errors={errors}
+          type="number"
+        />
+        <Input
           id="dmc"
           label="DMC"
           disabled={isLoading}
@@ -299,7 +352,7 @@ const EditProductForm = ({ product }: { product: Product }) => {
                   onClick={(category) => setCustomValue("category", category)}
                   selected={category === item.label}
                   label={item.label}
-                  icon={item.icon}
+                  icon={getIconComponent(item.icon)}
                 />
               </div>
             );
@@ -317,6 +370,16 @@ const EditProductForm = ({ product }: { product: Product }) => {
           </div>
           <div className="grid grid-cols-2 gap-3">
             {colors.map((item, index) => {
+              // Only pass previous image if color matches
+              const matchedImage = Array.isArray(product.images)
+                ? product.images
+                    .filter((img: string) => img && item.color && img.toLowerCase().includes(item.color.toLowerCase()))
+                    .map((img: string) => ({
+                      color: item.color,
+                      colorCode: item.colorCode,
+                      image: img,
+                    }))
+                : [];
               return (
                 <SelectColor
                   key={index}
@@ -324,11 +387,7 @@ const EditProductForm = ({ product }: { product: Product }) => {
                   addImageToState={addImageToState}
                   removeImageFromState={removeImageFromState}
                   isProductCreated={false}
-                  previousImages={product.images.filter((image) => {
-                    if (image.color === item.color) {
-                      return image;
-                    }
-                  })}
+                  previousImages={matchedImage}
                 />
               );
             })}

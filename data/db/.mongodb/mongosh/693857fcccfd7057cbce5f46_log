@@ -10,6 +10,6 @@
 {"t":{"$date":"2025-12-09T17:10:20.982Z"},"s":"I","c":"MONGOSH-SNIPPETS","id":1000000019,"ctx":"snippets","msg":"Loaded snippets","attr":{"installdir":"/data/db/.mongodb/mongosh/snippets"}}
 {"t":{"$date":"2025-12-09T17:10:20.984Z"},"s":"I","c":"MONGOSH","id":1000000003,"ctx":"repl","msg":"Start loading CLI scripts"}
 {"t":{"$date":"2025-12-09T17:10:20.988Z"},"s":"I","c":"MONGOSH","id":1000000013,"ctx":"repl","msg":"Evaluating script passed on the command line"}
-{"t":{"$date":"2025-12-09T17:10:20.989Z"},"s":"I","c":"MONGOSH","id":1000000007,"ctx":"repl","msg":"Evaluating input","attr":{"input":"use('ecommerce-nextjs-app'); db.Order.updateMany({ createDate: null }, { $set: { createDate: new Date() } })"}}
-{"t":{"$date":"2025-12-09T17:10:20.990Z"},"s":"I","c":"MONGOSH","id":1000000008,"ctx":"shell-api","msg":"Used \"use\" command","attr":{"db":"ecommerce-nextjs-app"}}
-{"t":{"$date":"2025-12-09T17:10:20.993Z"},"s":"I","c":"MONGOSH","id":1000000011,"ctx":"shell-api","msg":"Performed API call","attr":{"method":"updateMany","class":"Collection","db":"ecommerce-nextjs-app","coll":"Order","arguments":{"filter":{"createDate":null},"options":{}}}}
+{"t":{"$date":"2025-12-09T17:10:20.989Z"},"s":"I","c":"MONGOSH","id":1000000007,"ctx":"repl","msg":"Evaluating input","attr":{"input":"use('millionare-ecom-lifeplan'); db.Order.updateMany({ createDate: null }, { $set: { createDate: new Date() } })"}}
+{"t":{"$date":"2025-12-09T17:10:20.990Z"},"s":"I","c":"MONGOSH","id":1000000008,"ctx":"shell-api","msg":"Used \"use\" command","attr":{"db":"millionare-ecom-lifeplan"}}
+{"t":{"$date":"2025-12-09T17:10:20.993Z"},"s":"I","c":"MONGOSH","id":1000000011,"ctx":"shell-api","msg":"Performed API call","attr":{"method":"updateMany","class":"Collection","db":"millionare-ecom-lifeplan","coll":"Order","arguments":{"filter":{"createDate":null},"options":{}}}}

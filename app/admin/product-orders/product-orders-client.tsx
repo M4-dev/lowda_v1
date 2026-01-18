@@ -50,28 +50,42 @@ const OrderListClient: React.FC<OrderListClientProps> = ({ orders }) => {
                       <h3 className="font-semibold text-lg mb-2">
                         Customer Details
                       </h3>
-                      <p className="text-sm">
-                        <span className="font-medium">Name:</span>{" "}
-                        {order.address?.name || order.user.name || "N/A"}
-                      </p>
-                      {order.address?.phone && (
-                        <p className="text-sm">
-                          <span className="font-medium">Phone:</span>{" "}
-                          {order.address.phone}
-                        </p>
-                      )}
-                      {order.address?.address && (
-                        <p className="text-sm">
-                          <span className="font-medium">Address:</span>{" "}
-                          {order.address.address}
-                        </p>
-                      )}
-                      {order.address?.hostel && (
-                        <p className="text-sm">
-                          <span className="font-medium">Hostel:</span>{" "}
-                          {order.address.hostel}
-                        </p>
-                      )}
+                      {(() => {
+                        let addressObj: any = null;
+                        if (order.address) {
+                          try {
+                            addressObj = typeof order.address === "string" ? JSON.parse(order.address) : order.address;
+                          } catch {
+                            addressObj = null;
+                          }
+                        }
+                        return (
+                          <>
+                            <p className="text-sm">
+                              <span className="font-medium">Name:</span>{" "}
+                              {addressObj?.name || order.user.name || "N/A"}
+                            </p>
+                            {addressObj?.phone && (
+                              <p className="text-sm">
+                                <span className="font-medium">Phone:</span>{" "}
+                                {addressObj.phone}
+                              </p>
+                            )}
+                            {addressObj?.address && (
+                              <p className="text-sm">
+                                <span className="font-medium">Address:</span>{" "}
+                                {addressObj.address}
+                              </p>
+                            )}
+                            {addressObj?.hostel && (
+                              <p className="text-sm">
+                                <span className="font-medium">Hostel:</span>{" "}
+                                {addressObj.hostel}
+                              </p>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
 
                     <div>

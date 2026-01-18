@@ -90,9 +90,24 @@ const AddRating: React.FC<AddRatingProps> = ({ product, user }) => {
   if (!product) return null;
 
   const deliveredOrder = user?.orders.some(
-    (order) =>
-      order.products.find((item) => item.id === product.id) &&
-      order.deliveryStatus === "delivered"
+    (order) => {
+      return (
+        order.products
+          .map((itemStr: any) => {
+            let item = itemStr;
+            if (typeof itemStr === "string") {
+              try {
+                item = JSON.parse(itemStr);
+              } catch {
+                item = {};
+              }
+            }
+            return item;
+          })
+          .find((item: any) => item.id === product.id) &&
+        order.deliveryStatus === "delivered"
+      );
+    }
   );
 
   const userReview = product?.reviews.find((review: Review) => {

@@ -15,9 +15,17 @@ interface CartClientProps {
   currentUser: SafeUser | null;
 }
 
+
+import { useCartLoading } from "@/context/cart-loading-context";
+
 const CartClient: React.FC<CartClientProps> = ({ currentUser }) => {
   const { cartProducts, cartSubtotal, handleClearCart } = useCart();
   const router = useRouter();
+  const { setCartLoading } = useCartLoading();
+
+  React.useEffect(() => {
+    setCartLoading(false);
+  }, [setCartLoading]);
 
   if (!cartProducts || cartProducts.length === 0) {
     return (

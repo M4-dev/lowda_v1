@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import Avatar from "../avatar";
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
-import { MenuItem } from "@mui/material";
+import MenuItem from "./menu-item";
 import { signOut } from "next-auth/react";
 import BackDrop from "./back-drop";
 import { SafeUser } from "@/types";

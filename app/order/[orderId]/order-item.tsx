@@ -2,7 +2,22 @@
 
 import { formatPrice } from "@/utils/format-price";
 import { truncateText } from "@/utils/truncate-text";
-import { CartProductType } from "@prisma/client";
+// Define the type based on expected product structure
+interface SelectedImgType {
+  color: string;
+  colorCode: string;
+  image: string;
+}
+
+interface CartProductType {
+  id?: string;
+  name: string;
+  price: number;
+  quantity: number;
+  selectedImg: SelectedImgType;
+  brand?: string;
+  category?: string;
+}
 import Image from "next/image";
 
 interface OrderItemProps {

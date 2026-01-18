@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { formatPrice } from "@/utils/format-price";
 import Status from "@/app/components/status";
+import { appConfig } from "@/config/appConfig";
+
 interface ProductDetailsProps {
   product: any;
 }
@@ -44,6 +46,19 @@ const Horizontal = () => {
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
   
+  const normalizedImages = Array.isArray(product.images) 
+    ? product.images.map((img: any, index: number) => {
+        if (typeof img === 'string') {
+          return {
+            color: `Variant ${index + 1}`,
+            colorCode: "#000000",
+            image: img
+          };
+        }
+        return img;
+      })
+    : [];
+
   const { cartProducts, handleAddProductToCart } = useCart();
   const [isProductInCart, setIsProductInCart] = useState<boolean>(false);
   const [cartProduct, setCartProduct] = useState<CartProductType>({
@@ -52,7 +67,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     description: product.description,
     category: product.category,
     brand: product.brand,
-    selectedImg: { ...product.images[0] },
+    selectedImg: normalizedImages[0] ? { ...normalizedImages[0] } : {
+      color: "White",
+      colorCode: "#FFFFFF",
+      image: ""
+    },
     quantity: 1,
     price: product.price,
     dmc: product.dmc || 0,
@@ -72,7 +91,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         setIsProductInCart(true);
       }
     }
-  }, [cartProducts]);
+  }, [cartProducts, product.id]);
 
   const handleColorSelect = useCallback(
     (value: SelectedImgType) => {
@@ -80,7 +99,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         return { ...prev, selectedImg: value };
       });
     },
-    [cartProduct.selectedImg]
+    []
   );
 
   const handleQuantityIncrease = useCallback(() => {
@@ -104,8 +123,21 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     });
   }, [cartProduct]);
 
-  // Get product link for sharing
-  const productLink = `${process.env.NEXT_PUBLIC_BASE_URL || ''}/product/${product.id}`;
+  // Get product link for sharing (always include domain, even on first render)
+  const [productLink, setProductLink] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}/product/${product.id}`;
+    }
+    // fallback for SSR: use env or empty string
+    return `${process.env.NEXT_PUBLIC_BASE_URL || ''}/product/${product.id}`;
+  });
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const link = `${window.location.origin}/product/${product.id}`;
+      setProductLink(link);
+      console.log('Product share link:', link);
+    }
+  }, [product.id]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 sm:mt-6">
@@ -114,6 +146,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
           cartProduct={cartProduct}
           product={product}
           handleColorSelect={handleColorSelect}
+          images={normalizedImages}
         />
       </div>
       <div className="flex flex-col gap-1 text-slate-500 text-sm my-auto">
@@ -164,16 +197,18 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
         <div className="flex flex-col gap-1">
           {/* WhatsApp Share Link */}
-          <a
-            href={`https://wa.me/?text=${encodeURIComponent(productLink)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mb-2 inline-block text-green-600 hover:text-green-800 text-xs font-medium"
-          >
-            Share on WhatsApp
-          </a>
+          {productLink && (
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(productLink)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mb-2 inline-block text-green-600 hover:text-green-800 text-xs font-medium"
+            >
+              Share on WhatsApp
+            </a>
+          )}
           <SetColor
-            images={product.images}
+            images={normalizedImages}
             cartProduct={cartProduct}
             handleColorSelect={handleColorSelect}
           />
@@ -184,15 +219,15 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
           />
 
           <Horizontal />
-          {product.list !== product.price && (
+          {product.discount > 0 ? (
             <div className="flex flex-wrap font-normal text-md text-slate-400 gap-2 mb-1">
               <span className="line-through text-2xl">
-                {formatPrice((product.list + (product.dmc || 0)) * cartProduct.quantity)}
+                {formatPrice(product.price)}
               </span>
               <Status
                 text={
                   Math.round(
-                    ((product.price - product.list) / product.price) * 100
+                    (product.discount / product.price) * 100
                   ) + "% OFF"
                 }
                 icon={Check}
@@ -200,11 +235,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                 color="text-white font-medium"
               />
             </div>
-          )}
+          ) : null}
           <div className="flex gap-4 text-3xl text-slate-600 font-bold">
             <span>Price</span>
             <div>
-              {formatPrice(product.price)}
+              {formatPrice(product.price - (product.discount || 0))}
             </div>
           </div>
           <div className="flex gap-4 text-2xl text-slate-700 font-bold mt-2">
@@ -217,7 +252,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
           {isProductInCart && (
             <p className="mt-1 text-slate-500 flex  items-center gap-1">
-              <CheckCircle size={20} className="text-teal-500" />
+              <CheckCircle size={20} style={{ color: appConfig.themeColor }} />
               <span>Product added to cart</span>
             </p>
           )}

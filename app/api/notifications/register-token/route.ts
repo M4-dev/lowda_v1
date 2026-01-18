@@ -12,6 +12,15 @@ export async function POST(request: Request) {
 
     const { token } = await request.json();
 
+    // If token is null, remove FCM token (disable notifications)
+    if (token === null) {
+      await prisma.user.update({
+        where: { id: currentUser.id },
+        data: { fcmToken: null },
+      });
+      return NextResponse.json({ success: true, message: "Notifications disabled" });
+    }
+
     if (!token) {
       return NextResponse.json({ error: "Token is required" }, { status: 400 });
     }
