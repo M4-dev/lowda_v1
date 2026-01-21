@@ -121,7 +121,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
       toast.success("Order made successfully!");
       handleClearCart();
-      handleSetPaymentSuccess(true, formData, order.orderId);
+      handleSetPaymentSuccess(true, formData, order.orderId, clientOrderToken);
       setClientOrderToken(uuidv4()); // Reset for next order
     } catch (error) {
       toast.error("Payment failed. Please try again.");

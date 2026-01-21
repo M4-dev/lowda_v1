@@ -57,7 +57,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ settings, currentUser }
         );
       }
     },
-    [cartProducts, handleClearCart, handleSetPaymentIntent]
+    [handleSetPaymentIntent]
   );
 
   return (
