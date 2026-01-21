@@ -1,10 +1,9 @@
-import Button from "@mui/joy/Button";
-import Divider from "@mui/joy/Divider";
-import DialogTitle from "@mui/joy/DialogTitle";
-import DialogContent from "@mui/joy/DialogContent";
-import DialogActions from "@mui/joy/DialogActions";
-import Modal from "@mui/joy/Modal";
-import ModalDialog from "@mui/joy/ModalDialog";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
 import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
 
 type AlertDialogProps = {
@@ -23,37 +22,35 @@ const AlertDialog = ({
   handleOK,
 }: AlertDialogProps) => {
   return (
-    <Modal open={open} onClose={() => setOpen(false)}>
-      <ModalDialog variant="outlined" role="alertdialog">
-        <DialogTitle>
-          <WarningRoundedIcon />
-          Confirmation
-        </DialogTitle>
-        <Divider />
-        <DialogContent>
-          Are you sure you want to {action} &quot;{name}&quot;?
-        </DialogContent>
-        <DialogActions>
-          <Button
-            variant="solid"
-            color="danger"
-            onClick={() => {
-              handleOK();
-              setOpen(false);
-            }}
-          >
-            Delete
-          </Button>
-          <Button
-            variant="plain"
-            color="neutral"
-            onClick={() => setOpen(false)}
-          >
-            Cancel
-          </Button>
-        </DialogActions>
-      </ModalDialog>
-    </Modal>
+    <Dialog open={open} onClose={() => setOpen(false)}>
+      <DialogTitle>
+        <WarningRoundedIcon style={{ marginRight: 8 }} />
+        Confirmation
+      </DialogTitle>
+      <Divider />
+      <DialogContent>
+        Are you sure you want to {action} &quot;{name}&quot;?
+      </DialogContent>
+      <DialogActions>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={() => {
+            handleOK();
+            setOpen(false);
+          }}
+        >
+          Delete
+        </Button>
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={() => setOpen(false)}
+        >
+          Cancel
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
