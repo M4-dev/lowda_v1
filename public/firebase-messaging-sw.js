@@ -4,12 +4,12 @@ importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compa
 
 // Initialize the Firebase app in the service worker
 firebase.initializeApp({
-  apiKey: "AIzaSyAxX37J3uJ9ObsOgAhd9N9Y3fMVHXvRnAI",
-  authDomain: "windowshop-787b2.firebaseapp.com",
-  projectId: "windowshop-787b2",
-  storageBucket: "windowshop-787b2.firebasestorage.app",
-  messagingSenderId: "215526597312",
-  appId: "1:215526597312:web:054d1d43b1ae999ffc8325"
+  apiKey: "AIzaSyD6r8KH9vgb-J3R9ePgoTac35yc6ELPsp0",
+  authDomain: "lowda-83311.firebaseapp.com",
+  projectId: "lowda-83311",
+  storageBucket: "lowda-83311.firebasestorage.app",
+  messagingSenderId: "498229825506",
+  appId: "1:498229825506:web:64d553627255eee9e2b3bb"
 });
 
 // Retrieve an instance of Firebase Messaging
@@ -22,8 +22,8 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification.title || 'WindowShop';
   const notificationOptions = {
     body: payload.notification.body,
-    icon: payload.notification.icon || '/icon-192x192.png',
-    badge: '/icon-96x96.png',
+    icon: payload.notification.icon || '/icons/icon-192x192.png',
+    badge: '/icons/icon-96x96.png',
     tag: payload.data?.tag || 'default',
     requireInteraction: true,
     vibrate: [200, 100, 200],
