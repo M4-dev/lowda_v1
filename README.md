@@ -12,8 +12,6 @@
   <a href="#"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.2.2-blue?logo=typescript"></a>
   <a href="#"><img alt="Tailwind" src="https://img.shields.io/badge/Tailwind--CSS-3.3.5-blue?logo=tailwindcss"></a>
   <a href="#"><img alt="Prisma" src="https://img.shields.io/badge/Prisma-5.6.0-blue?logo=prisma"></a>
-  <a href="#"><img alt="MongoDb" src="https://img.shields.io/badge/MongoDb-7.0-blue?logo=mongodb"></a>
-  <a href="#"><img alt="Stripe" src="https://img.shields.io/badge/Stripe-14.5.0-blue?logo=stripe"></a>
 </div>
 
 ## Description
@@ -37,27 +35,9 @@ A fullstack e-commerce website developed in Nextjs and deployed in Vercel. This 
 - TypeScript.
 - Tailwind CSS.
 - Prisma.
-- MongoDb.
-- Stripe.
-
-## Visit the web application:
-
-- https://nextjs-commerce-app-pi.vercel.app/
 
 ## How to Complete the Checkout Process?
 
-- Utilize the following test card information:
-
-  - Card number: 4242 4242 4242 4242
-  - Expiry date: 04/44
-  - CVC code: 444
-
-- For more information about simulate payments to test integration visit:
-  - https://stripe.com/docs/testing?locale=en-419
 
 ## Where to find me?
 
-<div>
-  <a href="https://github.com/hernanhawryluk"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-grey?style=for-the-badge&logo=github"></a>
-  <a href="https://www.linkedin.com/in/hernan-hawryluk"><img alt="GitHub" src="https://img.shields.io/badge/LinkedIn-blue?style=for-the-badge&logo=linkedin"></a>
-</div>
