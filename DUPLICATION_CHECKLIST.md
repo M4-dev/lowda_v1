@@ -46,5 +46,17 @@ Use this checklist to update all project-specific settings when duplicating your
 - [ ] Push to new remote: `git push -u origin main` (or `master` if that's your branch)
 
 ---
+## 10. DB setup
+Run your Prisma migrations to create the necessary tables in your database:
+
+[] npx prisma migrate deploy
+
+[] npx prisma migrate deploy
+or, for development:
+
+[] npx prisma migrate dev
+
+After the migration completes, run your seed script again:
+[] npm run seed
 
 **Tip:** Search the codebase for the old project name, Firebase project ID, and any URLs to ensure nothing is missed.

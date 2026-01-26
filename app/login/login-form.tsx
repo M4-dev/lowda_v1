@@ -1,3 +1,4 @@
+import { appConfig } from '../../config/appConfig';
 "use client";
 
 import { useEffect, useState } from "react";

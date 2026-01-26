@@ -2,7 +2,7 @@ export const appConfig = {
   aboutUsDescription: "Your personal electronics store",
   headerFooterBgColor: "#690854", // Default Tailwind bg-zinc-900
   headerFooterFontColor: "#f1f5f9", // Default Tailwind text-slate-200
-  appName: "lowdaInc",
+  appName: "lowda.Inc",
   appDescription: "Your personal electronics store",
   logoUrl: "/logo.png",
   themeColor: "#fff",
