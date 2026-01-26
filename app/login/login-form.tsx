@@ -1,5 +1,6 @@
-import { appConfig } from '../../config/appConfig';
+
 "use client";
+import { appConfig } from '../../config/appConfig';
 
 import { useEffect, useState } from "react";
 import Heading from "../components/heading";
